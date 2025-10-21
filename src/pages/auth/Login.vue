@@ -66,7 +66,7 @@ function resetCooldown() {
   remainingTime.value = 0
   loginAttempts.value = 0
   localStorage.removeItem('loginAttempts')
-  localStorage.removeItem('cooldownEndTime')
+  localStorage.removeItem('cooldownEndtime')
 
   if (hasShowCooldownEndAlert === false) {
     hasShowCooldownEndAlert = true
@@ -137,11 +137,11 @@ function checkLockCondition() {
     const fiveMinutes = 5 * 60 * 1000
     const end = Date.now() + fiveMinutes
     cooldownEndtime.value = end
-    localStorage.setItem('cooldownEndTime', end)
+    localStorage.setItem('cooldownEndtime', end)
     isCooldown.value = true
     Swal.fire({
       title: 'Terlalu banyak percobaan!',
-      text: 'Akun anda diblokir sementara selama 5 menit.',
+      text: 'Harap tunggu selama 5 menit.',
       icon: 'warning',
       confirmButtonText: 'OK',
     })

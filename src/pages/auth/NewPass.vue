@@ -42,7 +42,7 @@ const onSubmit = (values) => {
   }).then(() => {
     showPassword.value = false
     showConfirmPassword.value = false
-    router.push('/login')
+    router.push('/')
   })
 }
 </script>
