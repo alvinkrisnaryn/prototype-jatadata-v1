@@ -1,21 +1,19 @@
 <script setup>
 import { CButton, CCard } from '@coreui/vue'
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
 import router from '@/router'
+import { login } from '@/api/auth'
 
 const showPassword = ref(false)
 const isPasswordFocused = ref(false)
-
-const loginAttempts = ref(parseInt(localStorage.getItem('loginAttempts')) || 0)
-const cooldownEndtime = ref(localStorage.getItem('cooldownEndtime'))
+const loading = ref(false)
 const isCooldown = ref(false)
 const remainingTime = ref(0)
 let countdownInterval = null
-let hasShowCooldownEndAlert = false
 
 const schema = yup.object({
   email: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
@@ -29,129 +27,80 @@ const schema = yup.object({
     .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Harus ada karakter spesial'),
 })
 
-const correctEmail = 'akunpomosda@gmail.com'
-const correctPassword = '#Pomosdabangkit2025'
-
 function togglePassword() {
   showPassword.value = !showPassword.value
 }
 
-function checkCooldown() {
-  if (!cooldownEndtime.value) return
-  const now = Date.now()
-  if (now < cooldownEndtime.value) {
-    isCooldown.value = true
-    updateRemainingTime()
-    startCountdown()
-  } else {
-    resetCooldown()
-  }
-}
-
-function updateRemainingTime() {
-  const now = Date.now()
-  const diff = Math.max(0, Math.floor((cooldownEndtime.value - now) / 1000))
-  remainingTime.value = diff
-  if (diff <= 0) resetCooldown()
-}
-
-function startCountdown() {
+function startCountdown(seconds) {
   clearInterval(countdownInterval)
-  countdownInterval = setInterval(updateRemainingTime, 1000)
+  remainingTime.value = seconds
+  isCooldown.value = true
+
+  countdownInterval = setInterval(() => {
+    remainingTime.value--
+    if (remainingTime.value <= 0) {
+      clearInterval(countdownInterval)
+      isCooldown.value = false
+      Swal.fire({
+        title: 'Waktu tunggu berakhir',
+        text: 'Sekarang anda dapat login kembali',
+        icon: 'info',
+        confirmButtonText: 'OK',
+      })
+    }
+  }, 1000)
 }
 
-function resetCooldown() {
-  clearInterval(countdownInterval)
-  isCooldown.value = false
-  remainingTime.value = 0
-  loginAttempts.value = 0
-  localStorage.removeItem('loginAttempts')
-  localStorage.removeItem('cooldownEndtime')
+const onSubmit = async (values) => {
+  if (isCooldown.value) return
 
-  if (hasShowCooldownEndAlert === false) {
-    hasShowCooldownEndAlert = true
-    Swal.fire({
-      title: 'Waktu tunggu berakhir',
-      text: 'Sekarang anda dapat login kembali',
-      icon: 'info',
-      confirmButtonText: 'OK',
+  loading.value = true
+  try {
+    const res = await login({
+      email: values.email,
+      password: values.password,
     })
+
+    if (res.responseCode === 200) {
+      const data = res.data
+      localStorage.setItem('token', data.accessToken)
+      localStorage.setItem('tokenType', data.tokenType)
+      localStorage.setItem('username', data.username)
+      localStorage.setItem('role', data.role.name)
+
+      Swal.fire({
+        title: 'Login Berhasil',
+        text: `Selamat datang, ${data.username}!`,
+        icon: 'success',
+        confirmButtonText: 'OK',
+      })
+      router.push('/dashboard')
+    }
+  } catch (err) {
+    const res = err.response?.data
+
+    if (res?.responseCode === 404) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Gagal',
+        html: 'Email atau password salah.',
+        confirmButtonText: 'Coba Lagi',
+      })
+    }
+
+    if (res?.responseCode === 423) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Akun Terkunci Sementara',
+        html: `Silakan coba lagi dalam ${res.lockedTime} detik.`,
+        confirmButtonText: 'OK',
+      })
+      startCountdown(res.lockedTime)
+    }
+  } finally {
+    loading.value = false
   }
 }
-
-const onSubmit = (values) => {
-  if (isCooldown.value) {
-    Swal.fire({
-      title: 'Terlalu banyak percobaan!',
-      text: 'Coba lagi setelah beberapa menit.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    })
-    return
-  }
-
-  const { email, password } = values
-
-  if (email !== correctEmail) {
-    loginAttempts.value++
-    localStorage.setItem('loginAttempts', loginAttempts.value)
-    Swal.fire({
-      title: 'Email salah!',
-      text: 'Email yang Anda masukkan salah.',
-      icon: 'error',
-      confirmButtonText: 'Coba Lagi',
-    })
-    checkLockCondition()
-    return
-  }
-
-  if (password !== correctPassword) {
-    loginAttempts.value++
-    localStorage.setItem('loginAttempts', loginAttempts.value)
-    Swal.fire({
-      title: 'Password salah!',
-      text: 'Password yang Anda masukkan salah.',
-      icon: 'error',
-      confirmButtonText: 'Coba Lagi',
-    })
-    checkLockCondition()
-    return
-  }
-
-  resetCooldown()
-  sessionStorage.setItem('email', email)
-  sessionStorage.setItem('password', password)
-
-  Swal.fire({
-    title: 'Login Berhasil',
-    text: 'Anda berhasil login',
-    icon: 'success',
-    confirmButtonText: 'OK',
-  }).then(() => {
-    router.push('/dashboard')
-  })
-}
-
-function checkLockCondition() {
-  if (loginAttempts.value >= 3) {
-    const fiveMinutes = 5 * 60 * 1000
-    const end = Date.now() + fiveMinutes
-    cooldownEndtime.value = end
-    localStorage.setItem('cooldownEndtime', end)
-    isCooldown.value = true
-    Swal.fire({
-      title: 'Terlalu banyak percobaan!',
-      text: 'Harap tunggu selama 5 menit.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    })
-    checkCooldown()
-  }
-}
-
-onMounted(() => {
-  checkCooldown()
-})
 </script>
 
 <template>
@@ -208,8 +157,10 @@ onMounted(() => {
               <ErrorMessage name="password" class="d-block text-danger small m-1" />
             </div>
 
-            <CButton class="btn-login w-100 mb-2" type="submit" :disabled="isCooldown">
-              <template v-if="!isCooldown">Login</template>
+            <CButton class="btn-login w-100 mb-2" type="submit" :disabled="isCooldown || loading">
+              <template v-if="!isCooldown">
+                {{ loading ? 'Memproses...' : 'Login' }}
+              </template>
               <template v-else>
                 Tunggu {{ Math.floor(remainingTime / 60) }}:{{
                   (remainingTime % 60).toString().padStart(2, '0')
@@ -230,12 +181,6 @@ onMounted(() => {
 <style scoped>
 .container {
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    hsl(30 25% 97%) 0%,
-    hsl(150 20% 96%) 50%,
-    hsl(30 20% 98%) 100%
-  );
 }
 
 .card {

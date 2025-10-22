@@ -39,19 +39,31 @@ const router = createRouter({
   routes,
 })
 
-// router.beforeEach((to, from, next) => {
-//   const email = sessionStorage.getItem('email')
-//   const password = sessionStorage.getItem('password')
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return Date.now() >= payload.exp * 1000
+  } catch (error) {
+    return true
+  }
+}
 
-//   const isLoggedIn = email && password
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  const isLoggedIn = !!token && !isTokenExpired(token)
 
-//   if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn) {
-//     next({ name: 'Login' })
-//   } else if ((to.name === 'Login' || to.name === 'ForgotPassword') && isLoggedIn) {
-//     next({ name: 'Dashboard' })
-//   } else {
-//     next()
-//   }
-// })
+  if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn) {
+    localStorage.clear()
+    next({ name: 'Login' })
+    return
+  }
+
+  if (isLoggedIn && ['Login', 'ForgotPassword', 'OtpVerify', 'NewPass'].includes(to.name)) {
+    next({ name: 'Dashboard' })
+    return
+  }
+
+  next()
+})
 
 export default router
