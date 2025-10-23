@@ -1,7 +1,7 @@
 <script setup>
 import { CButton, CCard } from '@coreui/vue'
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
@@ -31,25 +31,44 @@ function togglePassword() {
   showPassword.value = !showPassword.value
 }
 
-function startCountdown(seconds) {
+function startCountdownFromEnd(endTimestamp) {
   clearInterval(countdownInterval)
-  remainingTime.value = seconds
+  const updateRemaining = () => {
+    const now = Date.now()
+    const diff = Math.max(0, Math.ceil((endTimestamp - now) / 1000))
+    remainingTime.value = diff
+    if (diff <= 0) finishCountdown()
+  }
+  updateRemaining()
+  countdownInterval = setInterval(updateRemaining, 1000)
   isCooldown.value = true
-
-  countdownInterval = setInterval(() => {
-    remainingTime.value--
-    if (remainingTime.value <= 0) {
-      clearInterval(countdownInterval)
-      isCooldown.value = false
-      Swal.fire({
-        title: 'Waktu tunggu berakhir',
-        text: 'Sekarang anda dapat login kembali',
-        icon: 'info',
-        confirmButtonText: 'OK',
-      })
-    }
-  }, 1000)
 }
+
+function finishCountdown() {
+  clearInterval(countdownInterval)
+  countdownInterval = null
+  isCooldown.value = false
+  remainingTime = 0
+  localStorage.removeItem('cooldownEndTime')
+  Swal.fire({
+    title: 'Waktu tunggu berakhir',
+    text: 'Sekarang anda dapat login kembali',
+    icon: 'info',
+    confirmButtonText: 'OK',
+  })
+}
+
+onMounted(() => {
+  const storeEnd = localStorage.getItem('cooldownEndTime')
+  if (storeEnd) {
+    const end = parseInt(storeEnd, 10)
+    if (!Number.isNaN(end) && Date.now() < end) {
+      startCountdownFromEnd(end)
+    } else {
+      localStorage.removeItem('cooldownEndTime')
+    }
+  }
+})
 
 const onSubmit = async (values) => {
   if (isCooldown.value) return
@@ -68,6 +87,8 @@ const onSubmit = async (values) => {
       localStorage.setItem('username', data.username)
       localStorage.setItem('role', data.role.name)
 
+      localStorage.removeItem('cooldownEndtime')
+
       Swal.fire({
         title: 'Login Berhasil',
         text: `Selamat datang, ${data.username}!`,
@@ -83,7 +104,7 @@ const onSubmit = async (values) => {
       Swal.fire({
         icon: 'error',
         title: 'Login Gagal',
-        html: 'Email atau password salah.',
+        html: 'Email atau Password salah.',
         confirmButtonText: 'Coba Lagi',
       })
     }
@@ -92,10 +113,12 @@ const onSubmit = async (values) => {
       Swal.fire({
         icon: 'warning',
         title: 'Akun Terkunci Sementara',
-        html: `Silakan coba lagi dalam ${res.lockedTime} detik.`,
+        html: `Silakan coba dalam ${res.lockedTime} detik.`,
         confirmButtonText: 'OK',
       })
-      startCountdown(res.lockedTime)
+      const end = Date.now() + res.lockedTime * 1000
+      localStorage.setItem('cooldownEndTime', String(end))
+      startCountdownFromEnd(end)
     }
   } finally {
     loading.value = false
@@ -159,7 +182,7 @@ const onSubmit = async (values) => {
 
             <CButton class="btn-login w-100 mb-2" type="submit" :disabled="isCooldown || loading">
               <template v-if="!isCooldown">
-                {{ loading ? 'Memproses...' : 'Login' }}
+                {{ loading ? 'Tunggu sebentar...' : 'Login' }}
               </template>
               <template v-else>
                 Tunggu {{ Math.floor(remainingTime / 60) }}:{{

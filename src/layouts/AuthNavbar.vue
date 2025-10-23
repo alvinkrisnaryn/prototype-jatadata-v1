@@ -5,7 +5,7 @@ import { CNavbar, CNavbarBrand } from '@coreui/vue'
 <template>
   <div class="auth-navbar">
     <CNavbar>
-      <CNavbarBrand href="/" class="d-flex align-items-center justify-content-center">
+      <CNavbarBrand href="/login" class="d-flex align-items-center justify-content-center">
         <img src="/pomosda.png" alt="Logo" height="45" class="me-2 ms-4" />
         <p class="fw-semibold" style="font-size: 1.25rem; margin: 0">Jatadata</p>
       </CNavbarBrand>

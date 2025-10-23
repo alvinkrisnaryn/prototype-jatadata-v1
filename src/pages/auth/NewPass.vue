@@ -6,6 +6,7 @@ import { CButton, CCard } from '@coreui/vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
+import { changePassword } from '@/api/auth'
 
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -34,16 +35,45 @@ function togglePassword(type) {
   else showConfirmPassword.value = !showConfirmPassword.value
 }
 
-const onSubmit = (values) => {
-  Swal.fire({
-    icon: 'success',
-    title: 'Password Change!',
-    text: 'Your password has been successfully updated.',
-  }).then(() => {
-    showPassword.value = false
-    showConfirmPassword.value = false
-    router.push('/')
-  })
+const onSubmit = async (values) => {
+  const email = localStorage.getItem('resetEmail')
+
+  if (!email) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Email tidak ditemukan!',
+      text: 'Silakan lakukan proses lupa password kembali.',
+    }).then(() => router.push('/forgot-pass'))
+    return
+  }
+
+  try {
+    const response = await changePassword({
+      email,
+      newPassword: values.password,
+      confirmNewPassword: values.confirmPassword,
+    })
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Password berhasil diubah!',
+      text: response.responseMessage || 'Silakan login dengan password baru Anda.',
+    }).then(() => {
+      localStorage.removeItem('resetEmail')
+      router.push('/login')
+    })
+  } catch (err) {
+    console.error('Change password error:', err.response?.data)
+    const msg =
+      err?.response?.data?.responseMessage ||
+      JSON.stringify(err?.response?.data) ||
+      'Terjadi kesalahan ketika merubah password.'
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal Mengubah Password!',
+      text: msg,
+    })
+  }
 }
 </script>
 

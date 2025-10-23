@@ -2,24 +2,53 @@
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
 import { useRouter } from 'vue-router'
 import { CButton, CCard } from '@coreui/vue'
+import { ref } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
+import { forgotPassword } from '@/api/auth'
 
 const router = useRouter()
+const loading = ref(false)
+const isCooldown = ref(false)
 
 const schema = yup.object({
-  email: yup.string().required('Email wajib diisi').email('Format emaul tidak valid'),
+  email: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
 })
 
-const onSubmit = (values) => {
-  Swal.fire({
-    icon: 'success',
-    title: 'send OTP!',
-    text: `An OTP has been sent to ${values.email}`,
-  }).then(() => {
-    router.push('/otp-verify')
-  })
+const onSubmit = async (values) => {
+  if (isCooldown.value) return
+
+  loading.value = true
+
+  try {
+    const res = await forgotPassword({ email: values.email })
+
+    if (res.responseCode === 200) {
+      localStorage.setItem('resetEmail', values.email)
+
+      Swal.fire({
+        icon: 'success',
+        title: 'OTP Dikirim!',
+        text: `Kode OTP telah dikirim ke email ${values.email}`,
+      }).then(() => {
+        router.push('/validate-otp')
+      })
+    }
+  } catch (err) {
+    const res = err.response?.data
+
+    if (res?.responseCode === 404) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Email Tidak Ditemukan',
+        html: 'Email yang anda gunakan tidak terdaftar!',
+        confirmButtonText: 'Coba Lagi',
+      })
+    }
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -28,7 +57,8 @@ const onSubmit = (values) => {
     <div class="container d-flex flex-column align-items-center justify-content-center">
       <CCard class="p-4 shadow-md border-0" style="max-width: 430px; width: 100%">
         <div class="w-100" style="max-width: 400px">
-          <h2 class="fw-semibold fs-3 text-center mb-5">Lupa Password</h2>
+          <h2 class="fw-semibold fs-3 text-center">Lupa Password</h2>
+          <p class="text-center mb-4 text-muted-light">Silahkan masukkan email anda</p>
 
           <Form @submit="onSubmit" :validation-schema="schema">
             <div class="form-group">
@@ -42,11 +72,15 @@ const onSubmit = (values) => {
               <ErrorMessage name="email" class="d-block text-danger m-1" />
             </div>
 
-            <CButton class="btn-email w-100 mb-3" type="submit"> Kirim Email </CButton>
+            <CButton class="btn-email w-100 mb-3" type="submit" :disabled="isCooldown || loading">
+              <template v-if="!isCooldown">
+                {{ loading ? 'Tunggu sebentar...' : 'Kirim Email' }}
+              </template>
+            </CButton>
           </Form>
 
           <div class="text-center">
-            <router-link to="/" class="btn-new-account">Sudah punya akun?</router-link>
+            <router-link to="/login" class="btn-new-account">Sudah punya akun?</router-link>
           </div>
         </div>
       </CCard>
@@ -174,6 +208,10 @@ input:focus,
 .btn-new-account:hover {
   color: #0056b3;
   text-decoration: underline;
+}
+
+.text-muted-light {
+  color: rgba(108, 117, 125, 0.8);
 }
 
 input:-webkit-autofill {

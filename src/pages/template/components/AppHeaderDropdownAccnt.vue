@@ -15,7 +15,7 @@ async function handleLogout() {
       html: 'Anda berhasil keluar.',
       icon: 'success',
       confirmButtonText: 'OK',
-    }).then(() => router.push('/'))
+    }).then(() => router.push('/login'))
   } catch (err) {
     console.error('Logout error:', err)
     Swal.fire({

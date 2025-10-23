@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ref, nextTick, onUnmounted } from 'vue'
 import { CButton, CCard } from '@coreui/vue'
 import Swal from 'sweetalert2'
+import { validateOtp, forgotPassword } from '@/api/auth'
 
 const router = useRouter()
 const otp = ref(['', '', '', ''])
@@ -11,11 +12,12 @@ const inputRefs = ref([])
 
 const isCooldown = ref(false)
 const countdown = ref(0)
-let coolddownTimer = null
+let cooldownTimer = null
+
+const email = localStorage.getItem('resetEmail')
 
 function handleInput(e, index) {
   const value = e.target.value
-
   if (!/^\d?$/.test(value)) {
     otp.value[index] = ''
     return
@@ -31,33 +33,66 @@ function handleBackspace(e, index) {
   }
 }
 
-function handleSubmitOtp() {
+async function handleSubmitOtp() {
   const otpCode = otp.value.join('')
-
   if (otpCode.length < 4) {
     Swal.fire({
       icon: 'error',
-      title: 'Invalid OTP',
-      text: 'Please enter a 4-digit OTP code.',
+      title: 'OTP Salah',
+      text: 'Masukkan 4 digit kode OTP!',
     })
     return
   }
 
-  Swal.fire({
-    icon: 'success',
-    title: 'OTP Verified!',
-    text: 'Your OTP has been verified successfully.',
-  }).then(() => {
-    otp.value = ['', '', '', '']
-    router.push('/new-pass')
-  })
+  try {
+    const res = await validateOtp({ email, otp: otpCode })
+
+    if (res.responseCode === 200) {
+      Swal.fire({
+        icon: 'success',
+        title: 'OTP Berhasil!',
+        text: 'Kode OTP berhasil diverifikasi.' || response.responseMessage,
+      }).then(() => {
+        otp.value = ['', '', '', '']
+        router.push('/change-password')
+      })
+    }
+  } catch (err) {
+    const res = err?.response?.data
+
+    if (res?.responseCode === 400) {
+      Swal.fire({
+        icon: 'error',
+        title: 'OTP Tidak Valid!',
+        html: 'Kode OTP salah atau kadaluarsa.',
+        confirmButtonText: 'Coba Lagi',
+      })
+    }
+
+    if (res?.responseCode === 404) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Email Tidak Ditemukan!',
+        html: 'Email anda tidak terdaftar.',
+      })
+    }
+
+    if (res?.responseCode === 410) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Kode OTP Kadaluarsa!',
+        html: 'Silahkan masukkan email kembali.',
+      }).then(() => {
+        router.push('/forgot-pass')
+      })
+    }
+  }
 }
 
-function startCooldown() {
+function startCooldown(seconds = 60) {
   isCooldown.value = true
-  countdown.value = 60
-
-  coolddownTimer = setInterval(() => {
+  countdown.value = seconds
+  cooldownTimer = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
       clearInterval(coolddownTimer)
@@ -66,21 +101,39 @@ function startCooldown() {
   }, 1000)
 }
 
-function handleResendOtp() {
+async function handleResendOtp() {
   if (isCooldown.value) return
 
-  Swal.fire({
-    icon: 'info',
-    title: 'OTP Sent!',
-    text: 'A new OTP has been sent to your email.',
-  })
-  otp.value = ['', '', '', '']
-  nextTick(() => inputRefs.value[0]?.focus())
-  startCooldown()
+  try {
+    const res = await forgotPassword({ email })
+    Swal.fire({
+      icon: 'success',
+      title: 'OTP Dikirim Ulang!',
+      html: 'Kode OTP telah dikirim ke email Anda.' || res.responseMessage,
+    })
+    otp.value = ['', '', '', '']
+    nextTick(() => inputRefs.value[0]?.focus())
+    startCooldown()
+  } catch (err) {
+    const res = err.response?.data
+    const status = err.response?.status
+
+    if (status === 429) {
+      const locked = res?.lockedTime || 60
+      Swal.fire({
+        icon: 'warning',
+        title: 'Terlalu Banyak Permintaan',
+        html: `Silakan coba dalam ${locked} detik.`,
+        confirmButtonText: 'OK',
+      })
+      startCooldown(locked)
+      return
+    }
+  }
 }
 
 onUnmounted(() => {
-  if (coolddownTimer) clearInterval(coolddownTimer)
+  if (cooldownTimer) clearInterval(cooldownTimer)
 })
 </script>
 
@@ -108,12 +161,12 @@ onUnmounted(() => {
           </div>
 
           <CButton class="btn-otp w-100 mb-3" type="submit" @click="handleSubmitOtp">
-            Kirim OTP
+            Verifikasi OTP
           </CButton>
 
           <div class="text-center">
             <button class="btn-resend-otp" :disabled="isCooldown" @click="handleResendOtp">
-              <span v-if="!isCooldown">Kirim ulang</span>
+              <span v-if="!isCooldown">Kirim ulang code</span>
               <span v-else>Kirim ulang kode dalam {{ countdown }}</span>
             </button>
           </div>

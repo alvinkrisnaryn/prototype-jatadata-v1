@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/pages/auth/Login.vue'
 import ForgotPass from '@/pages/auth/ForgotPass.vue'
-import OtpVerify from '@/pages/auth/OtpVerify.vue'
-import NewPass from '@/pages/auth/NewPass.vue'
+import ValidateOtp from '@/pages/auth/OtpVerify.vue'
+import ChangePassword from '@/pages/auth/NewPass.vue'
 import Dashboard from '@/pages/dashboard/Dashboard.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/login',
     name: 'Login',
     component: Login,
   },
@@ -23,14 +23,14 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/otp-verify',
-    name: 'OtpVerify',
-    component: OtpVerify,
+    path: '/validate-otp',
+    name: 'ValidateOtp',
+    component: ValidateOtp,
   },
   {
-    path: '/new-pass',
-    name: 'NewPass',
-    component: NewPass,
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: ChangePassword,
   },
 ]
 
