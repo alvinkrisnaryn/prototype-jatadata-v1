@@ -3,7 +3,7 @@ import Login from '@/pages/auth/Login.vue'
 import ForgotPass from '@/pages/auth/ForgotPass.vue'
 import ValidateOtp from '@/pages/auth/OtpVerify.vue'
 import ChangePassword from '@/pages/auth/NewPass.vue'
-import Dashboard from '@/pages/dashboard/Dashboard.vue'
+import Home from '@/pages/dashboard/Home.vue'
 
 const routes = [
   {
@@ -17,12 +17,6 @@ const routes = [
     component: ForgotPass,
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/validate-otp',
     name: 'ValidateOtp',
     component: ValidateOtp,
@@ -31,6 +25,12 @@ const routes = [
     path: '/change-password',
     name: 'ChangePassword',
     component: ChangePassword,
+  },
+  {
+    path: '/home',
+    name: 'Home',
+    component: Home,
+    meta: { requiresAuth: true },
   },
 ]
 
@@ -67,7 +67,7 @@ router.beforeEach((to, from, next) => {
     isLoggedIn &&
     ['Login', 'ForgotPassword', 'ValidateOtp', 'ChangePassword'].includes(to.name)
   ) {
-    next({ name: 'Dashboard' })
+    next({ name: 'Home' })
     return
   }
 

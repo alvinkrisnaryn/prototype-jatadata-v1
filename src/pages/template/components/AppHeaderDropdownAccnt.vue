@@ -1,31 +1,7 @@
 <script setup>
-import Swal from 'sweetalert2'
-import router from '@/router'
 import avatar from '@/assets/images/8.jpg'
 
 const itemsCount = 42
-
-async function handleLogout() {
-  try {
-    localStorage.clear()
-    sessionStorage.clear()
-
-    Swal.fire({
-      title: 'Logout Berhasil',
-      html: 'Anda berhasil keluar.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-    }).then(() => router.push('/login'))
-  } catch (err) {
-    console.error('Logout error:', err)
-    Swal.fire({
-      title: 'Terjadi Kesalahan',
-      html: 'Gagal melakukan logout, coba lagi nanti.',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    })
-  }
-}
 </script>
 
 <template>
@@ -74,9 +50,7 @@ async function handleLogout() {
       </CDropdownItem>
       <CDropdownDivider />
       <CDropdownItem> <CIcon icon="cil-shield-alt" /> Lock Account </CDropdownItem>
-      <CDropdownItem @click="handleLogout" style="cursor: pointer">
-        <CIcon icon="cil-lock-locked" /> Logout
-      </CDropdownItem>
+      <CDropdownItem> <CIcon icon="cil-lock-locked" /> Logout </CDropdownItem>
     </CDropdownMenu>
   </CDropdown>
 </template>

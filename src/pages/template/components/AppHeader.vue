@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useColorModes } from '@coreui/vue'
 
-import AppBreadcrumb from '@/pages/template/components/AppBreadcrumb.vue'
 import AppHeaderDropdownAccnt from '@/pages/template/components/AppHeaderDropdownAccnt.vue'
 import { useSidebarStore } from '@/pages/template/stores/sidebar.js'
 
@@ -20,7 +19,7 @@ onMounted(() => {
     if (document.documentElement.scrollTop > 0) {
       headerClassNames.value = 'mb-4 p-0 shadow-sm'
     } else {
-      headerClassNames.value = 'mb-4 p-0'
+      headerClassNames.value = 'mb-4 p-0 '
     }
   })
 })
@@ -28,37 +27,12 @@ onMounted(() => {
 
 <template>
   <CHeader position="sticky" :class="headerClassNames">
-    <CContainer class="border-bottom px-4" fluid>
+    <CContainer class="px-4" fluid>
       <CHeaderToggler @click="debugToggleSidebar()" style="margin-inline-start: -14px">
         <CIcon icon="cil-menu" size="lg" />
       </CHeaderToggler>
-      <CHeaderNav class="d-none d-md-flex">
-        <CNavItem>
-          <CNavLink href="/dashboard"> Dashboard </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">Users</CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">Settings</CNavLink>
-        </CNavItem>
-      </CHeaderNav>
-      <CHeaderNav class="ms-auto">
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon icon="cil-bell" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon icon="cil-list" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon icon="cil-envelope-open" size="lg" />
-          </CNavLink>
-        </CNavItem>
+      <CHeaderNav class="d-none d-md-flex fw-5">
+        <CNavItem class="fs-3 fw-semibold">Dashboard Koor Cabang </CNavItem>
       </CHeaderNav>
       <CHeaderNav>
         <li class="nav-item py-1">
@@ -105,9 +79,6 @@ onMounted(() => {
         </li>
         <AppHeaderDropdownAccnt />
       </CHeaderNav>
-    </CContainer>
-    <CContainer class="px-4" fluid>
-      <AppBreadcrumb />
     </CContainer>
   </CHeader>
 </template>

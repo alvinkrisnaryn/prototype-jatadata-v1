@@ -95,7 +95,7 @@ const onSubmit = async (values) => {
         icon: 'success',
         confirmButtonText: 'OK',
       })
-      router.push('/dashboard')
+      router.push('/home')
     }
   } catch (err) {
     const res = err.response?.data

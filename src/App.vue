@@ -1,8 +1,8 @@
-<!-- <script setup>
+<script setup>
 import { onBeforeMount } from 'vue'
 import { useColorModes } from '@coreui/vue'
 
-import { useThemeStore } from '@/stores/theme.js'
+import { useThemeStore } from '../src/pages/template/stores/theme'
 
 const { isColorModeSet, setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
 const currentTheme = useThemeStore()
@@ -26,7 +26,7 @@ onBeforeMount(() => {
 
   setColorMode(currentTheme.theme)
 })
-</script> -->
+</script>
 
 <template>
   <router-view />

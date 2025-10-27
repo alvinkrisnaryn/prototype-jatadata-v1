@@ -3,8 +3,12 @@
 );
 @use '@coreui/chartjs/scss/coreui-chartjs';
 @use 'vendors/simplebar';
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 body {
+  --cui-body-font-family: 'Inter', sans-serif;
+
+  font-family: 'Inter', sans-serif;
   background: linear-gradient(
     135deg,
     hsl(30 25% 97%) 0%,
@@ -68,5 +72,49 @@ body {
 
   .footer {
     --cui-footer-bg: var(--cui-body-bg);
+  }
+}
+
+.sidebar-nav .nav-link:not(.active):hover {
+  background-color: transparent !important;
+  color: var(--cui-sidebar-nav-link-color, #212529) !important;
+}
+
+.sidebar-nav .nav-link.active {
+  font-weight: 700 !important;
+}
+
+.button-logout-minimal {
+  font-size: 1rem;
+  padding: 0;
+  background: none !important;
+  border: none !important;
+}
+
+@include color-mode(light) {
+  .button-logout-minimal {
+    color: #dc3545 !important;
+  }
+
+  .sidebar-nav {
+    .nav-link.active {
+      background-color: #e9ecef !important;
+      color: #000 !important;
+      font-weight: 700 !important;
+    }
+  }
+}
+
+@include color-mode(dark) {
+  .button-logout-minimal {
+    color: #ff6b6b !important;
+  }
+
+  .sidebar-nav {
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+    }
   }
 }
