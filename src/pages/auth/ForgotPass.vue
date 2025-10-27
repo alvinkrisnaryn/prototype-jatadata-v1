@@ -26,6 +26,7 @@ const onSubmit = async (values) => {
 
     if (res.responseCode === 200) {
       localStorage.setItem('resetEmail', values.email)
+      localStorage.setItem('otpExpireAt', Date.now() + 300000)
 
       Swal.fire({
         icon: 'success',

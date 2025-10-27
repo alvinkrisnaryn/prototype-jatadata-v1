@@ -51,6 +51,11 @@ function isTokenExpired(token) {
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const isLoggedIn = !!token && !isTokenExpired(token)
+  const resetEmail = localStorage.getItem('resetEmail')
+  const otpExpireAt = localStorage.getItem('otpExpireAt')
+  const now = Date.now()
+  const otpValid = otpExpireAt && now < otpExpireAt
+  const otpVerified = localStorage.getItem('otpVerified') === 'true'
 
   if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn) {
     localStorage.clear()
@@ -58,8 +63,43 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (isLoggedIn && ['Login', 'ForgotPassword', 'OtpVerify', 'NewPass'].includes(to.name)) {
+  if (
+    isLoggedIn &&
+    ['Login', 'ForgotPassword', 'ValidateOtp', 'ChangePassword'].includes(to.name)
+  ) {
     next({ name: 'Dashboard' })
+    return
+  }
+
+  if (to.name === 'ValidateOtp' && !resetEmail) {
+    next({ name: 'ForgotPassword' })
+    return
+  }
+
+  if (to.name === 'ChangePassword') {
+    if (!resetEmail) {
+      next({ name: 'ForgotPassword' })
+      return
+    }
+
+    if (!otpValid) {
+      localStorage.removeItem('otpExpireAt')
+      next({ name: 'ForgotPassword' })
+      return
+    }
+  }
+
+  if (to.name === 'ChangePassword' && !otpVerified) {
+    next({ name: 'ValidateOtp' })
+    return
+  }
+
+  if (
+    ['ForgotPassword', 'Login'].includes(to.name) &&
+    localStorage.getItem('otpExpireAt') &&
+    Date.now() < localStorage.getItem('otpExpireAt')
+  ) {
+    next({ name: 'ValidateOtp' })
     return
   }
 

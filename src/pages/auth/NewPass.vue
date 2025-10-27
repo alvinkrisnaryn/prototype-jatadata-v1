@@ -1,6 +1,6 @@
 <script setup>
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { CButton, CCard } from '@coreui/vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
@@ -8,11 +8,15 @@ import * as yup from 'yup'
 import Swal from 'sweetalert2'
 import { changePassword } from '@/api/auth'
 
+const router = useRouter()
+
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const isPasswordFocused = ref(false)
 const isConfirmFocused = ref(false)
-const router = useRouter()
+
+const otpExpired = ref(0)
+let otpTimer = null
 
 const schema = yup.object({
   password: yup
@@ -38,43 +42,98 @@ function togglePassword(type) {
 const onSubmit = async (values) => {
   const email = localStorage.getItem('resetEmail')
 
-  if (!email) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Email tidak ditemukan!',
-      text: 'Silakan lakukan proses lupa password kembali.',
-    }).then(() => router.push('/forgot-pass'))
-    return
-  }
-
   try {
-    const response = await changePassword({
+    const res = await changePassword({
       email,
       newPassword: values.password,
       confirmNewPassword: values.confirmPassword,
     })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Password berhasil diubah!',
-      text: response.responseMessage || 'Silakan login dengan password baru Anda.',
-    }).then(() => {
-      localStorage.removeItem('resetEmail')
-      router.push('/login')
-    })
+    if (res.responseCode === 200) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Password berhasil diubah!',
+        text: 'Silakan login dengan password baru Anda.' || response.responseMessage,
+      }).then(() => {
+        localStorage.removeItem('resetEmail')
+        localStorage.removeItem('otpExpireAt')
+        localStorage.removeItem('otpVerified')
+        router.push('/login')
+      })
+    }
   } catch (err) {
-    console.error('Change password error:', err.response?.data)
-    const msg =
-      err?.response?.data?.responseMessage ||
-      JSON.stringify(err?.response?.data) ||
-      'Terjadi kesalahan ketika merubah password.'
-    Swal.fire({
-      icon: 'error',
-      title: 'Gagal Mengubah Password!',
-      text: msg,
-    })
+    const res = err?.response?.data
+
+    if (res?.responseCode === 400) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Password Tidak Valid!',
+        html: 'Password yang anda masukkan tidak sama.',
+        confirmButtonText: 'Coba Lagi',
+      })
+    } else if (res?.responseCode === 404) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Email Tidak Ditemukan!',
+        text: 'Silakan masukkan email kembali.',
+      }).then(() => router.push('/forgot-password'))
+    } else if (res?.responseCode === 410) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Kode OTP Kadaluarsa!',
+        text: 'Silakan masukkan email kembali.',
+      }).then(() => router.push('/forgot-password'))
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Terjadi Kesalahan',
+        text: 'Silakan coba beberapa saat lagi.',
+      })
+    }
   }
 }
+
+function startOtpTimer(seconds) {
+  otpExpired.value = seconds
+  if (otpTimer) clearInterval(otpTimer)
+
+  otpTimer = setInterval(() => {
+    otpExpired.value--
+    if (otpExpired.value <= 0) {
+      clearInterval(otpTimer)
+      localStorage.removeItem('otpExpireAt')
+      Swal.fire({
+        icon: 'info',
+        title: 'Kode OTP Kadaluarsa!',
+        text: 'Silakan masukkan email kembali.',
+      }).then(() => {
+        router.push('/forgot-password')
+      })
+    }
+  }, 1000)
+}
+
+onMounted(() => {
+  const expireAt = localStorage.getItem('otpExpireAt')
+  const remaining = expireAt ? Math.floor((expireAt - Date.now()) / 1000) : 0
+
+  if (!remaining || remaining <= 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Kode OTP Kadaluarsa!',
+      text: 'Silakan masukkan email kembali.',
+    }).then(() => {
+      localStorage.removeItem('otpExpireAt')
+      router.push('/forgot-password')
+    })
+  } else {
+    startOtpTimer(remaining)
+  }
+})
+
+onUnmounted(() => {
+  if (otpTimer) clearInterval(otpTimer)
+})
 </script>
 
 <template>
