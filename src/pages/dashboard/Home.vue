@@ -2,7 +2,7 @@
 import { CContainer } from '@coreui/vue'
 import AppHeader from '@/pages/template/components/AppHeader.vue'
 import AppSidebar from '@/pages/template/components/AppSidebar.vue'
-// import AppFooter from '@/components/AppFooter.vue'
+import AppFooter from '@/pages/template/components/AppFooter.vue'
 </script>
 
 <template>

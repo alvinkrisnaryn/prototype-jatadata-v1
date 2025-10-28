@@ -1,6 +1,21 @@
+<script setup>
+import { CContainer } from '@coreui/vue'
+import AppHeader from '@/pages/template/components/AppHeader.vue'
+import AppSidebar from '@/pages/template/components/AppSidebar.vue'
+import AppFooter from '@/pages/template/components/AppFooter.vue'
+</script>
+
 <template>
   <div>
-    <h2>Master data</h2>
-    <p>Ini adalah halaman Master Data</p>
+    <AppSidebar />
+    <div class="wrapper d-flex flex-column min-vh-100">
+      <AppHeader />
+      <div class="body flex-grow-1">
+        <CContainer class="px-4" lg>
+          <router-view />
+        </CContainer>
+      </div>
+      <AppFooter />
+    </div>
   </div>
 </template>

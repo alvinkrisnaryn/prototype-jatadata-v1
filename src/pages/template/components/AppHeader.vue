@@ -9,20 +9,39 @@ const headerClassNames = ref('mb-4 p-0')
 const { colorMode, setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
 const sidebar = useSidebarStore()
 
-const debugToggleSidebar = () => {
-  console.log('Button clicked! Current status:', sidebar.visible)
-  sidebar.toggleVisible()
+const role = ref('')
+const dashboardTitle = ref('Dashboard')
+
+const formatRoleTitle = (roleValue) => {
+  if (!roleValue) return
+  switch (roleValue) {
+    case 'ROLE_CABANG':
+      return 'Koor Cabang'
+    case 'ROLE_KOJA':
+      return 'Koor Koja'
+    case 'ROLE_ADMIN':
+      return 'Super Admin'
+    default:
+      return roleValue.replace('ROLE_', '').toLowerCase()
+  }
 }
 
 onMounted(() => {
+  const storedRole = localStorage.getItem('role')
+  if (storedRole) {
+    role.value = storedRole
+    dashboardTitle.value = `Dashboard ${formatRoleTitle(storedRole)}`
+  }
+
   document.addEventListener('scroll', () => {
-    if (document.documentElement.scrollTop > 0) {
-      headerClassNames.value = 'mb-4 p-0 shadow-sm'
-    } else {
-      headerClassNames.value = 'mb-4 p-0 '
-    }
+    headerClassNames.value =
+      document.documentElement.scrollTop > 0 ? 'mb-4 p-0 shadow-md' : 'mb-4 p-0'
   })
 })
+
+const debugToggleSidebar = () => {
+  sidebar.toggleVisible()
+}
 </script>
 
 <template>
@@ -32,7 +51,7 @@ onMounted(() => {
         <CIcon icon="cil-menu" size="lg" />
       </CHeaderToggler>
       <CHeaderNav class="d-none d-md-flex fw-5">
-        <CNavItem class="fs-3 fw-semibold">Dashboard Koor Cabang </CNavItem>
+        <CNavItem class="fs-3 fw-semibold">{{ dashboardTitle }}</CNavItem>
       </CHeaderNav>
       <CHeaderNav>
         <li class="nav-item py-1">

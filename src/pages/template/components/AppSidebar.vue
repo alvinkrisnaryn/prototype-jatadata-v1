@@ -23,7 +23,6 @@ async function handleLogout() {
       confirmButtonText: 'OK',
     }).then(() => router.push('/login'))
   } catch (err) {
-    console.error('Logout error:', err)
     Swal.fire({
       title: 'Terjadi Kesalahan',
       html: 'Gagal melakukan logout, silakan coba lagi.',

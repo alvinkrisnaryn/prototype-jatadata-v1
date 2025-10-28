@@ -1,7 +1,7 @@
 import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
-import { CBadge, CSidebarNav, CNavItem, CNavGroup, CNavTitle } from '@coreui/vue'
+import { CSidebarNav } from '@coreui/vue'
 import nav from '@/_nav.js'
 
 import simplebar from 'simplebar-vue'

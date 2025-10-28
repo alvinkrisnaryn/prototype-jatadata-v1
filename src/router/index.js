@@ -1,38 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from '@/pages/auth/Login.vue'
-import ForgotPass from '@/pages/auth/ForgotPass.vue'
-import ValidateOtp from '@/pages/auth/OtpVerify.vue'
-import ChangePassword from '@/pages/auth/NewPass.vue'
-import Home from '@/pages/dashboard/Home.vue'
+import authRoutes from './auth.routes'
+import dashRoutes from './dashboard.routes'
+import Swal from 'sweetalert2'
 
-const routes = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login,
-  },
-  {
-    path: '/forgot-password',
-    name: 'ForgotPassword',
-    component: ForgotPass,
-  },
-  {
-    path: '/validate-otp',
-    name: 'ValidateOtp',
-    component: ValidateOtp,
-  },
-  {
-    path: '/change-password',
-    name: 'ChangePassword',
-    component: ChangePassword,
-  },
-  {
-    path: '/home',
-    name: 'Home',
-    component: Home,
-    meta: { requiresAuth: true },
-  },
-]
+const routes = [...authRoutes, ...dashRoutes]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,8 +29,17 @@ router.beforeEach((to, from, next) => {
   const otpVerified = localStorage.getItem('otpVerified') === 'true'
 
   if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn) {
-    localStorage.clear()
-    next({ name: 'Login' })
+    Swal.fire({
+      icon: 'warning',
+      title: 'Sesi Berakhir!',
+      text: 'Silahkan login kembali.',
+      confirmButtonText: 'OK',
+      timer: 4000,
+      timerProgressBar: true,
+    }).then(() => {
+      localStorage.clear()
+      router.push({ name: 'Login' })
+    })
     return
   }
 
