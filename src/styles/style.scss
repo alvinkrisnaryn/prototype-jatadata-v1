@@ -91,6 +91,13 @@ body {
   border: none !important;
 }
 
+
+.sidebar-nav a,
+.sidebar-nav a:hover,
+.sidebar-nav a:focus {
+  text-decoration: none !important;
+}
+
 @include color-mode(light) {
   .button-logout-minimal {
     color: #dc3545 !important;

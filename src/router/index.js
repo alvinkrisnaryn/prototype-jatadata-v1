@@ -29,15 +29,14 @@ router.beforeEach((to, from, next) => {
   const otpVerified = localStorage.getItem('otpVerified') === 'true'
 
   if (to.matched.some((record) => record.meta.requiresAuth) && !isLoggedIn) {
+    localStorage.clear()
     Swal.fire({
       icon: 'warning',
       title: 'Sesi Berakhir!',
       text: 'Silahkan login kembali.',
       confirmButtonText: 'OK',
       timer: 4000,
-      timerProgressBar: true,
     }).then(() => {
-      localStorage.clear()
       router.push({ name: 'Login' })
     })
     return
