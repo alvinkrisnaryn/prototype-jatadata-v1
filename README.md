@@ -63,10 +63,17 @@ npm install
 ├── public/                  # Aset statis (logo, gambar)
 ├── src/
 │   ├── __tests__/           # Unit tests untuk komponen
+│   ├── api/                 # Modul untuk komunikasi dengan API
+│   ├── assets/              # Aset icon
+│   ├── data/                # Data dummy
 │   ├── layouts/             # Komponen layout (AuthNavbar, DashboardNavbar)
 │   ├── pages/               # Halaman utama aplikasi
-│   │   ├── auth/            # Halaman otentikasi (Login, ForgotPass, OtpVerify, NewPass)
-│   │   └── dashboard/       # Halaman dashboard dan komponennya
+│   │   ├── auth/            # Halaman autentikasi
+│   │   └── dashboard/       # Halaman dashboard utama
+│   │   └── template/        # Components template
+│   │   │   └── components/  # Komponen kustom
+│   │   │   └── stores/      # Store kustom
+│   │   │   └── views/       # Halaman kustom
 │   ├── router/              # Konfigurasi Vue Router (index.js)
 │   ├── styles/              # File styling kustom
 │   ├── App.vue

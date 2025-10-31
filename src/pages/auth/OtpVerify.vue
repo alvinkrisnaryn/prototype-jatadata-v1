@@ -1,10 +1,12 @@
 <script setup>
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
 import { useRouter } from 'vue-router'
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { CButton, CCard } from '@coreui/vue'
 import Swal from 'sweetalert2'
 import { validateOtp, forgotPassword } from '@/api/auth'
+import { useThemeStore } from '@/pages/template/stores/theme'
+import { useColorModes } from '@coreui/vue'
 
 const router = useRouter()
 const otp = ref(['', '', '', ''])
@@ -16,6 +18,10 @@ let cooldownTimer = null
 
 const otpExpired = ref(300)
 let otpTimer = null
+
+
+const themeStore = useThemeStore()
+const { setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
 
 const email = localStorage.getItem('resetEmail')
 
@@ -180,6 +186,17 @@ onMounted(() => {
 onUnmounted(() => {
   if (otpTimer) clearInterval(otpTimer)
   if (cooldownTimer) clearInterval(cooldownTimer)
+})
+
+onMounted(() => {
+  setColorMode('light')
+  themeStore.toggleTheme('light')
+  document.body.classList.remove('dark')
+  document.body.classList.add('light')
+})
+
+onUnmounted(() => {
+  document.body.classList.remove('light')
 })
 </script>
 

@@ -19,7 +19,7 @@ const formatRoleTitle = (roleValue) => {
       return 'Koor Cabang'
     case 'ROLE_KOJA':
       return 'Koor Koja'
-    case 'ROLE_ADMIN':
+    case 'ROLE_SUPERADMIN':
       return 'Super Admin'
     default:
       return roleValue.replace('ROLE_', '').toLowerCase()

@@ -151,9 +151,45 @@ const closeModal = () => {
         </CRow>
       </CModalBody>
       <CModalFooter>
-        <CButton color="secondary" @click="closeModal">Batal</CButton>
-        <CButton color="primary" type="submit">{{ buttonText }}</CButton>
+        <CButton class="btn-batal" @click="closeModal">Batal</CButton>
+        <CButton class="btn-tambah-jamaah" type="submit">{{ buttonText }}</CButton>
       </CModalFooter>
     </Form>
   </CModal>
 </template>
+
+<style scoped>
+.btn-tambah-jamaah,
+.btn-tambah-jamaah:active,
+.btn-tambah-jamaah:focus,
+.btn-tambah-jamaah:disabled,
+.btn-tambah-jamaah:not(:disabled):not(:disabled):active {
+  background-color: #007bff;
+  color: #fff;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-tambah-jamaah:hover {
+  background-color: #0069d9;
+  color: rgba(235, 235, 235, 0.897);
+}
+
+.btn-batal,
+.btn-batal:active,
+.btn-batal:focus,
+.btn-batal:disabled,
+.btn-batal:not(:disabled):not(:disabled):active {
+  background-color: #dc3545;
+  color: #fff;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-batal:hover {
+  background-color: #c82333;
+  color: rgba(235, 235, 235, 0.897);
+}
+</style>

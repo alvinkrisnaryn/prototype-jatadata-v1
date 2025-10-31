@@ -154,7 +154,7 @@ const handleDeleteJamaah = async (id) => {
 
           <CRow>
             <CCol :xs="12" class="text-end">
-              <CButton color="primary" @click="handleOpenModal('add')" class="px-3 mb-3">
+              <CButton @click="handleOpenModal('add')" class="px-3 mb-3 btn-tambah-jamaah">
                 <CIcon :icon="cilPlus" class="me-1" /> Tambah Jamaah
               </CButton>
             </CCol>
@@ -178,3 +178,22 @@ const handleDeleteJamaah = async (id) => {
     />
   </DashboardLayout>
 </template>
+
+<style scoped>
+.btn-tambah-jamaah,
+.btn-tambah-jamaah:active,
+.btn-tambah-jamaah:focus,
+.btn-tambah-jamaah:disabled,
+.btn-tambah-jamaah:not(:disabled):not(:disabled):active {
+  background-color: #007bff;
+  color: #fff;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-tambah-jamaah:hover {
+  background-color: #0069d9;
+  color: rgba(235, 235, 235, 0.897);
+}
+</style>

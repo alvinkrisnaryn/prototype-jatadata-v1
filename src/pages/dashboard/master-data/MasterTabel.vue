@@ -21,10 +21,10 @@ const emit = defineEmits('edit', 'delete')
 const columns = [
   { key: 'no', label: 'No', _style: { width: '5%' } },
   { key: 'nama', label: 'Nama', _style: { width: '25%' } },
-  { key: 'noTelp', label: 'No Telp', _style: { width: '15%' } },
-  { key: 'pekerjaan', label: 'Pekerjaan', _style: { width: '15%' } },
+  { key: 'email', label: 'Email', _style: { width: '15%' } },
+  { key: 'role', label: 'Role', _style: { width: '15%' } },
+  { key: 'cabang', label: 'Cabang', _style: { width: '15%' } },
   { key: 'koja', label: 'Koja', _style: { width: '15%' } },
-  { key: 'status', label: 'Status', _style: { width: '15%' } },
   { key: 'aksi', label: 'Aksi', _style: { width: '10%' } },
 ]
 </script>
@@ -42,25 +42,12 @@ const columns = [
       <CTableRow v-for="(item, index) in data" :key="item.id" class="text-center">
         <CTableDataCell>{{ index + 1 }}</CTableDataCell>
         <CTableDataCell class="fw-semibold">{{ item.nama }}</CTableDataCell>
-        <CTableDataCell>{{ item.noTelp }}</CTableDataCell>
-        <CTableDataCell>{{ item.pekerjaan }}</CTableDataCell>
+        <CTableDataCell>{{ item.email }}</CTableDataCell>
+        <CTableDataCell>{{ item.role }}</CTableDataCell>
+        <CTableDataCell>{{ item.cabang }}</CTableDataCell>
         <CTableDataCell>{{ item.koja }}</CTableDataCell>
-        <CTableDataCell>
-          <span
-            :class="[
-              'badge',
-              {
-                'bg-success': item.status === 'Aktif',
-                'bg-danger': item.status === 'Non-Aktif',
-                'bg-info': item.status === 'Baru',
-              },
-            ]"
-          >
-            {{ item.status }}
-          </span>
-        </CTableDataCell>
         <CTableDataCell class="d-flex justify-content-center gap-2">
-          <CButton color="info" size="sm" @click="emit('edit', item.id)">
+          <CButton color="info" size="sm" @click="emit('edit', item)">
             <CIcon :icon="cilPencil" />
           </CButton>
           <CButton color="danger" size="sm" @click="emit('delete', item.id)">
@@ -70,7 +57,7 @@ const columns = [
       </CTableRow>
       <CTableRow v-if="data.length === 0">
         <CTableDataCell colspan="7" class="text-center text-muted">
-          Tidak ada data jamaah yang ditemukan
+          Tidak ada data koordinator yang ditemukan
         </CTableDataCell>
       </CTableRow>
     </CTableBody>

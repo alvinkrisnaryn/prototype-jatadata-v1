@@ -2,18 +2,34 @@
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
 import { useRouter } from 'vue-router'
 import { CButton, CCard } from '@coreui/vue'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
 import { forgotPassword } from '@/api/auth'
+import { useThemeStore } from '@/pages/template/stores/theme'
+import { useColorModes } from '@coreui/vue'
 
 const router = useRouter()
 const loading = ref(false)
 const isCooldown = ref(false)
 
+const themeStore = useThemeStore()
+const { setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
+
 const schema = yup.object({
   email: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
+})
+
+onMounted(() => {
+  setColorMode('light')
+  themeStore.toggleTheme('light')
+  document.body.classList.remove('dark')
+  document.body.classList.add('light')
+})
+
+onUnmounted(() => {
+  document.body.classList.remove('light')
 })
 
 const onSubmit = async (values) => {
