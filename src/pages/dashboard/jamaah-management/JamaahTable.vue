@@ -51,12 +51,12 @@ const columns = [
             :class="[
               'badge',
               {
-                'bg-success': item.status === 'Jamaah',
-                'bg-danger': item.status === 'Non-Jamaah',
+                'bg-success': item.status === 'MEMBER',
+                'bg-danger': item.status === 'NON_MEMBER',
               },
             ]"
           >
-            {{ item.status }}
+            {{ item.status === 'MEMBER' ? 'Jamaah' : 'Non-Jamaah' }}
           </span>
         </CTableDataCell>
         <CTableDataCell class="d-flex justify-content-center gap-2">

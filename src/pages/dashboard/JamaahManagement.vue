@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { CRow, CCol, CCard, CButton } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
@@ -10,33 +10,41 @@ import JamaahTable from '@/pages/dashboard/jamaah-management/JamaahTable.vue'
 import JamaahFilters from '@/pages/dashboard/jamaah-management/JamaahFilters.vue'
 import ModalJamaah from '@/pages/dashboard/jamaah-management/ModalJamaah.vue'
 
-import { getAllJamaah, addJamaah } from '@/api/jamaah'
+import { searchJamaah } from '@/api/jamaah'
 
 const jamaahData = ref([])
 const isLoading = ref(true)
+const totalElement = ref(0)
+const currentPage = ref(0)
+const pageSize = ref(0)
 
 const filterState = ref({
-  searchTerm: '',
-  koja: 'Semua Koja',
-  pekerjaan: 'Semua Pekerjaan',
-  status: 'Semua Status',
+  name: '',
+  kojaName: '',
+  occupationName: '',
+  status: '',
 })
-
-const modalVisible = ref(false)
-const isEditMode = ref(false)
-const currentJamaah = ref(null)
 
 const fetchJamaahData = async () => {
   try {
     isLoading.value = true
-    const response = await getAllJamaah()
-    console.log('DATA DARI BACKEND  ?:', response)
+    const params = {
+      name: filterState.value.name || null,
+      kojaId: filterState.value.kojaId || null,
+      occupationId: filterState.value.occupationId || null,
+      status: filterState.value.status || null,
+      page: currentPage.value,
+      size: pageSize.value,
+    }
 
-    jamaahData.value = Array.isArray(response.data)
-      ? response.data
-      : Array.isArray(response)
-        ? response
-        : []
+    const response = await searchJamaah(params)
+    if (response.responseCode === 200) {
+      jamaahData.value = response.data?.content || response.data || []
+      totalElement.value = response.data?.totalElements || jamaahData.value.length
+    } else {
+      jamaahData.value = []
+      totalElement.value = 0
+    }
   } catch (error) {
     console.error('Gagal memuat data jamaah:', error)
     Swal.fire({
@@ -49,28 +57,14 @@ const fetchJamaahData = async () => {
   }
 }
 
-onMounted(() => {
+watch(filterState, () => {
+  currentPage.value = 0
   fetchJamaahData()
 })
 
-const filteredJamaah = computed(() => {
-  return jamaahData.value.filter((jamaah) => {
-    const term = filterState.value.searchTerm.toLowerCase()
-    const nameMatch = jamaah.nama?.toLowerCase().includes(term)
-
-    const kojaMatch =
-      filterState.value.koja === 'Semua Koja' || jamaah.koja === filterState.value.koja
-
-    const pekerjaanMatch =
-      filterState.value.pekerjaan === 'Semua Pekerjaan' ||
-      jamaah.pekerjaan === filterState.value.pekerjaan
-
-    const statusMatch =
-      filterState.value.status === 'Semua Status' || jamaah.status === filterState.value.status
-
-    return nameMatch && kojaMatch && pekerjaanMatch && statusMatch
-  })
-})
+const modalVisible = ref(false)
+const isEditMode = ref(false)
+const currentJamaah = ref(null)
 
 const handleOpenModal = (mode, data = null) => {
   isEditMode.value = mode === 'edit'
@@ -128,6 +122,10 @@ const handleDeleteJamaah = async (id) => {
     })
   }
 }
+
+onMounted(() => {
+  fetchJamaahData()
+})
 </script>
 
 <template>
@@ -154,7 +152,7 @@ const handleDeleteJamaah = async (id) => {
 
           <JamaahTable
             v-if="!isLoading"
-            :data="filteredJamaah"
+            :data="jamaahData"
             @edit="(data) => handleOpenModal('edit', data)"
             @delete="handleDeleteJamaah"
           />

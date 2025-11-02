@@ -18,6 +18,29 @@ const filters = computed({
 const updateFilter = (key, value) => {
   filters.value = { ...filters.value, [key]: value }
 }
+
+const filterOptions = {
+  koja: [
+    { value: '', label: 'Semua Koja' },
+    { value: '1', label: 'Koja A' },
+    { value: '2', label: 'Koja B' },
+    { value: '3', label: 'Koja C' },
+  ],
+  occupation: [
+    { value: '', label: 'Semua Pekerjaan' },
+    { value: '1', label: 'Swasta' },
+    { value: '2', label: 'PNS' },
+    { value: '3', label: 'Wiraswasta' },
+    { value: '4', label: 'Mahasiswa' },
+    { value: '5', label: 'Petani' },
+  ],
+  status: [
+    { value: '', label: 'Semua Status' },
+    { value: 'MEMBER', label: 'Jamaah' },
+    { value: 'NON_MEMBER', label: 'Non Jamaah' },
+  ],
+}
+
 const handleExport = () => {
   Swal.fire({
     icon: 'success',
@@ -42,26 +65,26 @@ const handlePrint = () => {
       <CIcon :icon="cilFilter" class="text-muted" size="lg" />
       <div class="position-relative" style="width: 250px">
         <CFormInput
-          :value="filters.searchTerm"
-          @input="updateFilter('searchTerm', $event.target.value)"
+          :value="filters.name"
+          @input="updateFilter('name', $event.target.value)"
           placeholder="Cari berdasarkan nama"
           class="ps-2"
         />
       </div>
     </div>
 
-    <!-- <CFormSelect
-      :value="filters.koja"
-      @change="updateFilter('koja', $event.target.value)"
+    <CFormSelect
+      :value="filters.kojaId"
+      @change="updateFilter('kojaId', $event.target.value)"
       :options="filterOptions.koja"
       class="filter-select"
       aria-label="Filter Koja"
     />
 
     <CFormSelect
-      :value="filters.pekerjaan"
-      @change="updateFilter('pekerjaan', $event.target.value)"
-      :options="filterOptions.pekerjaan"
+      :value="filters.occupationId"
+      @change="updateFilter('occupationId', $event.target.value)"
+      :options="filterOptions.occupation"
       class="filter-select"
       aria-label="Filter Pekerjaan"
     />
@@ -72,7 +95,7 @@ const handlePrint = () => {
       :options="filterOptions.status"
       class="filter-select"
       aria-label="Filter Status"
-    /> -->
+    />
 
     <CButton @click="handleExport" class="btn-icon-adaptive flex-shrink-0">
       <CIcon :icon="cilCloudDownload" />

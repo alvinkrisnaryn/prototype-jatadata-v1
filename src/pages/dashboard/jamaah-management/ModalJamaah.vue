@@ -89,8 +89,8 @@ const closeModal = () => {
         <CRow>
           <CCol :md="6" class="mb-3">
             <CFormLabel for="name">Nama Jamaah</CFormLabel>
-            <Field Namae="name" v-slot="{ field }">
-              <CFormInput v-bind="field" id="name" placeholder="Nam lengkap" />
+            <Field name="name" v-slot="{ field }">
+              <CFormInput v-bind="field" id="name" placeholder="Nama lengkap" />
             </Field>
             <ErrorMessage name="name" class="d-block text-danger small m-1" />
           </CCol>
@@ -121,10 +121,10 @@ const closeModal = () => {
           </CCol>
 
           <CCol>
-            <CFormLabel for="kojaName">oja</CFormLabel>
+            <CFormLabel for="kojaName">Koja</CFormLabel>
             <Field name="kojaName" v-slot="{ field }">
               <CFormSelect v-bind="field" id="kojaName">
-                <option value="" disabled>Pilih oja</option>
+                <option value="" disabled>Pilih Koja</option>
                 <option value="Koja A">Koja A</option>
                 <option value="Koja B">Koja B</option>
                 <option value="Koja C">Koja C</option>
@@ -141,9 +141,8 @@ const closeModal = () => {
             <Field name="status" v-slot="{ field }">
               <CFormSelect v-bind="field" id="status">
                 <option value="" disabled>Pilih Status</option>
-                <option value="Aktif">Aktif</option>
-                <option value="Non Aktif">Non-Aktif</option>
-                <option value="Baru">Baru</option>
+                <option value="MEMBER">Jamaah</option>
+                <option value="NON_MEMBER">Non-Jamaah</option>
               </CFormSelect>
             </Field>
             <ErrorMessage name="status" class="d-block text-danger small m-1" />
