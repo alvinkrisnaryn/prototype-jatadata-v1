@@ -1,6 +1,6 @@
 import api from './index'
 
-const AUTH_BASE = '/auth'
+const AUTH_BASE = '/user_services/api/v1/users/auth'
 
 export async function login(payload) {
   const response = await api.post(`${AUTH_BASE}/login`, payload)

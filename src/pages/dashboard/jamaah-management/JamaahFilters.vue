@@ -9,15 +9,12 @@ const props = defineProps({
   currentFilters: Object,
 })
 const emit = defineEmits(['update:filters'])
-const filterOptions = {
-  koja: ['Semua Koja', 'Koja A', 'Koja B', 'Koja C', 'Koja D'],
-  pekerjaan: ['Semua Pekerjaan', 'Swasta', 'PNS', 'Wiraswasta', 'Mahasiswa', 'Petani'],
-  status: ['Semua Status', 'Aktif', 'Non-Aktif', 'Baru'],
-}
+
 const filters = computed({
   get: () => props.currentFilters,
   set: (value) => emit('update:filters', value),
 })
+
 const updateFilter = (key, value) => {
   filters.value = { ...filters.value, [key]: value }
 }
@@ -53,7 +50,7 @@ const handlePrint = () => {
       </div>
     </div>
 
-    <CFormSelect
+    <!-- <CFormSelect
       :value="filters.koja"
       @change="updateFilter('koja', $event.target.value)"
       :options="filterOptions.koja"
@@ -75,7 +72,7 @@ const handlePrint = () => {
       :options="filterOptions.status"
       class="filter-select"
       aria-label="Filter Status"
-    />
+    /> -->
 
     <CButton @click="handleExport" class="btn-icon-adaptive flex-shrink-0">
       <CIcon :icon="cilCloudDownload" />

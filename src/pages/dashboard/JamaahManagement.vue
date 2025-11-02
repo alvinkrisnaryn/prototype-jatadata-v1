@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { CRow, CCol, CCard, CButton } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
@@ -10,48 +10,10 @@ import JamaahTable from '@/pages/dashboard/jamaah-management/JamaahTable.vue'
 import JamaahFilters from '@/pages/dashboard/jamaah-management/JamaahFilters.vue'
 import ModalJamaah from '@/pages/dashboard/jamaah-management/ModalJamaah.vue'
 
-const jamaahData = ref([
-  {
-    id: 1,
-    nama: 'Budi Sudarsono',
-    noTelp: '082392839284',
-    pekerjaan: 'Swasta',
-    koja: 'Koja A',
-    status: 'Aktif',
-  },
-  {
-    id: 2,
-    nama: 'Siti Rahayu',
-    noTelp: '082392839234',
-    pekerjaan: 'Petani',
-    koja: 'Koja B',
-    status: 'Non-Aktif',
-  },
-  {
-    id: 3,
-    nama: 'Agus Salim',
-    noTelp: '082392549284',
-    pekerjaan: 'Mahasiswa',
-    koja: 'Koja C',
-    status: 'Baru',
-  },
-  {
-    id: 4,
-    nama: 'Mamat Maliki',
-    noTelp: '082393459284',
-    pekerjaan: 'Polisi',
-    koja: 'Koja C',
-    status: 'Aktif',
-  },
-  {
-    id: 5,
-    nama: 'Joko Mulyono',
-    noTelp: '082322149284',
-    pekerjaan: 'Presiden',
-    koja: 'Koja A',
-    status: 'Non-Aktif',
-  },
-])
+import { getAllJamaah, addJamaah } from '@/api/jamaah'
+
+const jamaahData = ref([])
+const isLoading = ref(true)
 
 const filterState = ref({
   searchTerm: '',
@@ -64,10 +26,37 @@ const modalVisible = ref(false)
 const isEditMode = ref(false)
 const currentJamaah = ref(null)
 
+const fetchJamaahData = async () => {
+  try {
+    isLoading.value = true
+    const response = await getAllJamaah()
+    console.log('DATA DARI BACKEND  ?:', response)
+
+    jamaahData.value = Array.isArray(response.data)
+      ? response.data
+      : Array.isArray(response)
+        ? response
+        : []
+  } catch (error) {
+    console.error('Gagal memuat data jamaah:', error)
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal Memuat Data',
+      text: 'Terjadi kesalahan saat mengambil data dari server.',
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchJamaahData()
+})
+
 const filteredJamaah = computed(() => {
   return jamaahData.value.filter((jamaah) => {
     const term = filterState.value.searchTerm.toLowerCase()
-    const nameMatch = jamaah.nama.toLowerCase().includes(term)
+    const nameMatch = jamaah.nama?.toLowerCase().includes(term)
 
     const kojaMatch =
       filterState.value.koja === 'Semua Koja' || jamaah.koja === filterState.value.koja
@@ -89,29 +78,32 @@ const handleOpenModal = (mode, data = null) => {
   modalVisible.value = true
 }
 
-const handleSaveJamaah = (newJamaahData) => {
-  if (isEditMode.value) {
-    const index = jamaahData.value.findIndex((j) => j.id === newJamaahData.id)
-    if (index !== -1) {
-      jamaahData.value[index] = newJamaahData
+const handleSaveJamaah = async (newJamaahData) => {
+  try {
+    if (isEditMode.value) {
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
         text: 'Data Jamaah berhasil diperbarui',
-        confirmButtonText: 'OK',
       })
+    } else {
+      await addJamaah(newJamaahData)
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Data Jamaah berhasil ditambahkan',
+      })
+      fetchJamaahData()
     }
-  } else {
-    newJamaahData.id = Date.now()
-    jamaahData.value.push(newJamaahData)
+  } catch (error) {
     Swal.fire({
-      icon: 'success',
-      title: 'Berhasil!',
-      text: 'Data Jamaah berhasil diperbarui',
-      confirmButtonText: 'OK',
+      icon: 'error',
+      title: 'Gagal Menyimpan',
+      text: 'Pastikan data valid atau server tidak bermasalah.',
     })
+  } finally {
+    modalVisible.value = false
   }
-  modalVisible.value = false
 }
 
 const handleDeleteJamaah = async (id) => {
@@ -161,10 +153,12 @@ const handleDeleteJamaah = async (id) => {
           </CRow>
 
           <JamaahTable
+            v-if="!isLoading"
             :data="filteredJamaah"
             @edit="(data) => handleOpenModal('edit', data)"
             @delete="handleDeleteJamaah"
           />
+          <div v-else class="text-center py-5 text-muted">Memuat data jamaah...</div>
         </CCard>
       </CCol>
     </CRow>

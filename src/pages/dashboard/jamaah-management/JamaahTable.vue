@@ -20,10 +20,10 @@ const props = defineProps({
 const emit = defineEmits('edit', 'delete')
 const columns = [
   { key: 'no', label: 'No', _style: { width: '5%' } },
-  { key: 'nama', label: 'Nama', _style: { width: '25%' } },
-  { key: 'noTelp', label: 'No Telp', _style: { width: '15%' } },
-  { key: 'pekerjaan', label: 'Pekerjaan', _style: { width: '15%' } },
-  { key: 'koja', label: 'Koja', _style: { width: '15%' } },
+  { key: 'name', label: 'Nama', _style: { width: '25%' } },
+  { key: 'phoneNumber', label: 'No Telp', _style: { width: '15%' } },
+  { key: 'occupationName', label: 'Pekerjaan', _style: { width: '15%' } },
+  { key: 'kojaName', label: 'Koja', _style: { width: '15%' } },
   { key: 'status', label: 'Status', _style: { width: '15%' } },
   { key: 'aksi', label: 'Aksi', _style: { width: '10%' } },
 ]
@@ -38,21 +38,21 @@ const columns = [
         </CTableHeaderCell>
       </CTableRow>
     </CTableHead>
+
     <CTableBody>
       <CTableRow v-for="(item, index) in data" :key="item.id" class="text-center">
         <CTableDataCell>{{ index + 1 }}</CTableDataCell>
-        <CTableDataCell class="fw-semibold">{{ item.nama }}</CTableDataCell>
-        <CTableDataCell>{{ item.noTelp }}</CTableDataCell>
-        <CTableDataCell>{{ item.pekerjaan }}</CTableDataCell>
-        <CTableDataCell>{{ item.koja }}</CTableDataCell>
+        <CTableDataCell class="fw-semibold">{{ item.name }}</CTableDataCell>
+        <CTableDataCell>{{ item.phoneNumber }}</CTableDataCell>
+        <CTableDataCell>{{ item.occupationName }}</CTableDataCell>
+        <CTableDataCell>{{ item.kojaName }}</CTableDataCell>
         <CTableDataCell>
           <span
             :class="[
               'badge',
               {
-                'bg-success': item.status === 'Aktif',
-                'bg-danger': item.status === 'Non-Aktif',
-                'bg-info': item.status === 'Baru',
+                'bg-success': item.status === 'Jamaah',
+                'bg-danger': item.status === 'Non-Jamaah',
               },
             ]"
           >

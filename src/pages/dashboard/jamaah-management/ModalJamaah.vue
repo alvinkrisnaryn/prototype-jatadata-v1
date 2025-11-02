@@ -30,14 +30,14 @@ const buttonText = computed(() => (props.isEdit ? 'Simpan Perubahan' : 'Tambah J
 const initialValues = ref({})
 
 const schema = yup.object({
-  nama: yup.string().required('Nama wajib diisi'),
-  noTelp: yup
+  name: yup.string().required('Nama wajib diisi'),
+  phoneNumber: yup
     .string()
     .required('No. Telepon wajib diisi')
     .matches(/^[0-9]+$/, 'Hanya angka yang diizinkan')
     .min(10, 'Minimal 10 digit'),
-  pekerjaan: yup.string().required('Pekerjaan wajib diisi'),
-  koja: yup.string().required('Koja wajib diisi'),
+  occupationName: yup.string().required('Pekerjaan wajib diisi'),
+  kojaName: yup.string().required('Koja wajib diisi'),
   status: yup.string().required('Status wajib diisi'),
 })
 
@@ -48,11 +48,11 @@ watch(
       initialValues.value = { ...newVal }
     } else {
       initialValues.value = {
-        nama: '',
-        noTelp: '',
-        pekerjaan: 'Swasta',
-        koja: 'Koja A',
-        status: 'Status',
+        name: '',
+        phoneNumber: '',
+        occupationName: 'Swasta',
+        kojaName: 'Koja A',
+        status: 'Jamaah',
       }
     }
   },
@@ -88,27 +88,27 @@ const closeModal = () => {
       <CModalBody>
         <CRow>
           <CCol :md="6" class="mb-3">
-            <CFormLabel for="nama">Nama Jamaah</CFormLabel>
-            <Field name="nama" v-slot="{ field }">
-              <CFormInput v-bind="field" id="nama" placeholder="Nama lengkap" />
+            <CFormLabel for="name">Nama Jamaah</CFormLabel>
+            <Field Namae="name" v-slot="{ field }">
+              <CFormInput v-bind="field" id="name" placeholder="Nam lengkap" />
             </Field>
-            <ErrorMessage name="nama" class="d-block text-danger small m-1" />
+            <ErrorMessage name="name" class="d-block text-danger small m-1" />
           </CCol>
 
           <CCol :md="6" class="mb-3">
-            <CFormLabel for="noTelp">No. Telepon</CFormLabel>
-            <Field name="noTelp" v-slot="{ field }">
-              <CFormInput v-bind="field" id="noTelp" placeholder="Contoh: 0812xxxxxxx" />
+            <CFormLabel for="phoneNumber">No. Telepon</CFormLabel>
+            <Field name="phoneNumber" v-slot="{ field }">
+              <CFormInput v-bind="field" id="phoneNumber" placeholder="Contoh: 0812xxxxxxx" />
             </Field>
-            <ErrorMessage name="noTelp" class="d-block text-danger small m-1" />
+            <ErrorMessage name="phoneNumber" class="d-block text-danger small m-1" />
           </CCol>
         </CRow>
 
         <CRow>
           <CCol :md="6" class="mb-3">
-            <CFormLabel for="pekerjaan">Pekerjaan</CFormLabel>
-            <Field name="pekerjaan" v-slot="{ field }">
-              <CFormSelect v-bind="field" id="pekerjaan">
+            <CFormLabel for="occupationName">Pekerjaan</CFormLabel>
+            <Field name="occupationName" v-slot="{ field }">
+              <CFormSelect v-bind="field" id="occupationName">
                 <option value="" disabled>Pilih Pekerjaan</option>
                 <option value="Swasta">Swasta</option>
                 <option value="PNS">PNS</option>
@@ -117,21 +117,21 @@ const closeModal = () => {
                 <option value="Petani">Petani</option>
               </CFormSelect>
             </Field>
-            <ErrorMessage name="pekerjaan" class="d-block text-danger small m-1" />
+            <ErrorMessage name="occupationName" class="d-block text-danger small m-1" />
           </CCol>
 
           <CCol>
-            <CFormLabel for="koja">Koja</CFormLabel>
-            <Field name="koja" v-slot="{ field }">
-              <CFormSelect v-bind="field" id="koja">
-                <option value="" disabled>Pilih Koja</option>
+            <CFormLabel for="kojaName">oja</CFormLabel>
+            <Field name="kojaName" v-slot="{ field }">
+              <CFormSelect v-bind="field" id="kojaName">
+                <option value="" disabled>Pilih oja</option>
                 <option value="Koja A">Koja A</option>
                 <option value="Koja B">Koja B</option>
                 <option value="Koja C">Koja C</option>
                 <option value="Koja D">Koja D</option>
               </CFormSelect>
             </Field>
-            <ErrorMessage name="koja" class="d-block text-danger small m-1" />
+            <ErrorMessage name="kojaName" class="d-block text-danger small m-1" />
           </CCol>
         </CRow>
 
