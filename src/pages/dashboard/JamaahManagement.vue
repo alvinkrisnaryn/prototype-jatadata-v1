@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { CRow, CCol, CCard, CButton } from '@coreui/vue'
+import { CRow, CCol, CCard, CButton, CPagination } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { cilPlus } from '@coreui/icons'
 import Swal from 'sweetalert2'
@@ -14,14 +14,15 @@ import { searchJamaah } from '@/api/jamaah'
 
 const jamaahData = ref([])
 const isLoading = ref(true)
-const totalElement = ref(0)
-const currentPage = ref(0)
-const pageSize = ref(0)
+const totalData = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(15)
+const totalPage = ref(1)
 
 const filterState = ref({
   name: '',
-  kojaName: '',
-  occupationName: '',
+  kojaId: '',
+  occupationId: '',
   status: '',
 })
 
@@ -29,21 +30,24 @@ const fetchJamaahData = async () => {
   try {
     isLoading.value = true
     const params = {
-      name: filterState.value.name || null,
-      kojaId: filterState.value.kojaId || null,
-      occupationId: filterState.value.occupationId || null,
-      status: filterState.value.status || null,
-      page: currentPage.value,
-      size: pageSize.value,
+      name: filterState.value.name || '',
+      kojaId: filterState.value.kojaId || '',
+      occupationId: filterState.value.occupationId || '',
+      status: filterState.value.status || '',
+      pageNumber: currentPage.value,
+      pageSize: pageSize.value,
     }
 
     const response = await searchJamaah(params)
     if (response.responseCode === 200) {
       jamaahData.value = response.data?.content || response.data || []
-      totalElement.value = response.data?.totalElements || jamaahData.value.length
+      totalData.value = response.data?.totalData || jamaahData.value.length
+      totalPage.value = response.data?.totalPage || 1
+      currentPage.value = response.data?.pageNumber || 1
     } else {
       jamaahData.value = []
-      totalElement.value = 0
+      totalData.value = 0
+      totalPage.value = 1
     }
   } catch (error) {
     console.error('Gagal memuat data jamaah:', error)
@@ -57,8 +61,12 @@ const fetchJamaahData = async () => {
   }
 }
 
+const refreshJamaahList = async () => {
+  await fetchJamaahData()
+}
+
 watch(filterState, () => {
-  currentPage.value = 0
+  currentPage.value = 1
   fetchJamaahData()
 })
 
@@ -72,29 +80,11 @@ const handleOpenModal = (mode, data = null) => {
   modalVisible.value = true
 }
 
-const handleSaveJamaah = async (newJamaahData) => {
+const handleSaveJamaah = async () => {
   try {
-    if (isEditMode.value) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Jamaah berhasil diperbarui',
-      })
-    } else {
-      await addJamaah(newJamaahData)
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Jamaah berhasil ditambahkan',
-      })
-      fetchJamaahData()
-    }
+    await refreshJamaahList()
   } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Gagal Menyimpan',
-      text: 'Pastikan data valid atau server tidak bermasalah.',
-    })
+    console.error('Gagal memperbarui daftar jamaah:', error)
   } finally {
     modalVisible.value = false
   }
@@ -104,7 +94,7 @@ const handleDeleteJamaah = async (id) => {
   const result = await Swal.fire({
     icon: 'warning',
     title: 'Anda yakin menghapus data ini?',
-    text: 'Data jaamaah yang dihapus tidak dapat dikembalikan!',
+    text: 'Data jamaah yang dihapus tidak dapat dikembalikan!',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
@@ -157,6 +147,21 @@ onMounted(() => {
             @delete="handleDeleteJamaah"
           />
           <div v-else class="text-center py-5 text-muted">Memuat data jamaah...</div>
+          <CPagination align="center" class="mt-3">
+            <CPaginationItem
+              v-for="page in totalPage"
+              :key="page"
+              :active="page === currentPage + 1"
+              @click="
+                () => {
+                  currentPage.valueOf = page - 1
+                  fetchJamaahData()
+                }
+              "
+            >
+              {{ page }}
+            </CPaginationItem>
+          </CPagination>
         </CCard>
       </CCol>
     </CRow>

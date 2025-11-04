@@ -2,8 +2,11 @@
 import { CFormInput, CFormSelect, CButton } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { cilFilter, cilCloudDownload, cilPrint } from '@coreui/icons'
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+
+import { getAllOccupation } from '@/api/occupations'
+import { getAllKoja } from '@/api/koja'
 
 const props = defineProps({
   currentFilters: Object,
@@ -19,27 +22,52 @@ const updateFilter = (key, value) => {
   filters.value = { ...filters.value, [key]: value }
 }
 
-const filterOptions = {
-  koja: [
-    { value: '', label: 'Semua Koja' },
-    { value: '1', label: 'Koja A' },
-    { value: '2', label: 'Koja B' },
-    { value: '3', label: 'Koja C' },
-  ],
-  occupation: [
-    { value: '', label: 'Semua Pekerjaan' },
-    { value: '1', label: 'Swasta' },
-    { value: '2', label: 'PNS' },
-    { value: '3', label: 'Wiraswasta' },
-    { value: '4', label: 'Mahasiswa' },
-    { value: '5', label: 'Petani' },
-  ],
-  status: [
-    { value: '', label: 'Semua Status' },
-    { value: 'MEMBER', label: 'Jamaah' },
-    { value: 'NON_MEMBER', label: 'Non Jamaah' },
-  ],
+const kojaOptions = ref([{ value: '', label: 'Semua Koja' }])
+const occupationOptions = ref([{ value: '', label: 'Semua Pekerjaan' }])
+const statusOptions = [
+  { value: '', label: 'Semua Status' },
+  { value: 'MEMBER', label: 'Jamaah' },
+  { value: 'NON_MEMBER', label: 'Non Jamaah' },
+]
+
+const loadOccupationOptions = async () => {
+  try {
+    const data = await getAllOccupation()
+    if (Array.isArray(data) && data.length > 0) {
+      occupationOptions.value = [
+        { value: '', label: 'Semua Pekerjaan' },
+        ...data.map((p) => ({
+          value: p.id,
+          label: `${p.name}`,
+        })),
+      ]
+    }
+  } catch (error) {
+    console.error('Gagal memuat data pekerjaan', error)
+  }
 }
+
+const loadKojaOptions = async () => {
+  try {
+    const data = await getAllKoja()
+    if (Array.isArray(data) && data.length > 0) {
+      kojaOptions.value = [
+        { value: '', label: 'Semua Koja' },
+        ...data.map((k) => ({
+          value: k.uuid,
+          label: `${k.name}`,
+        })),
+      ]
+    }
+  } catch (error) {
+    console.error('Gagal memuat data koja', error)
+  }
+}
+
+onMounted(() => {
+  loadOccupationOptions()
+  loadKojaOptions()
+})
 
 const handleExport = () => {
   Swal.fire({
@@ -49,6 +77,7 @@ const handleExport = () => {
     confirmButtonText: 'OK',
   })
 }
+
 const handlePrint = () => {
   Swal.fire({
     icon: 'success',
@@ -76,7 +105,7 @@ const handlePrint = () => {
     <CFormSelect
       :value="filters.kojaId"
       @change="updateFilter('kojaId', $event.target.value)"
-      :options="filterOptions.koja"
+      :options="kojaOptions"
       class="filter-select"
       aria-label="Filter Koja"
     />
@@ -84,7 +113,7 @@ const handlePrint = () => {
     <CFormSelect
       :value="filters.occupationId"
       @change="updateFilter('occupationId', $event.target.value)"
-      :options="filterOptions.occupation"
+      :options="occupationOptions"
       class="filter-select"
       aria-label="Filter Pekerjaan"
     />
@@ -92,7 +121,7 @@ const handlePrint = () => {
     <CFormSelect
       :value="filters.status"
       @change="updateFilter('status', $event.target.value)"
-      :options="filterOptions.status"
+      :options="statusOptions"
       class="filter-select"
       aria-label="Filter Status"
     />

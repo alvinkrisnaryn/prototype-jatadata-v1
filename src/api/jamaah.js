@@ -8,3 +8,8 @@ export async function searchJamaah(params = {}) {
   })
   return response.data
 }
+
+export async function addJamaah(params = {}) {
+  const response = await api.post(`${MEMBER_API}/members`, params)
+  return response.data
+}
