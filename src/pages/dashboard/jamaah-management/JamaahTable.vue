@@ -22,8 +22,8 @@ const columns = [
   { key: 'no', label: 'No', _style: { width: '5%' } },
   { key: 'name', label: 'Nama', _style: { width: '25%' } },
   { key: 'phoneNumber', label: 'No Telp', _style: { width: '15%' } },
-  { key: 'occupationName', label: 'Pekerjaan', _style: { width: '15%' } },
-  { key: 'kojaName', label: 'Koja', _style: { width: '15%' } },
+  { key: 'occupationName', label: 'Pekerjaan', _style: { width: '20%' } },
+  { key: 'kojaName', label: 'Koja', _style: { width: '10%' } },
   { key: 'status', label: 'Status', _style: { width: '15%' } },
   { key: 'aksi', label: 'Aksi', _style: { width: '10%' } },
 ]
@@ -56,7 +56,7 @@ const columns = [
               },
             ]"
           >
-            {{ item.status === 'MEMBER' ? 'Jamaah' : 'Non-Jamaah' }}
+            {{ item.status === 'MEMBER' ? 'Jamaah' : 'Non Jamaah' }}
           </span>
         </CTableDataCell>
         <CTableDataCell class="d-flex justify-content-center gap-2">

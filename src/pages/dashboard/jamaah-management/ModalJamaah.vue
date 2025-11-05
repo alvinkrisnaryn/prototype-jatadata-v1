@@ -15,7 +15,6 @@ import {
 } from '@coreui/vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
-import Swal from 'sweetalert2'
 
 import { storeToRefs } from 'pinia'
 import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
@@ -34,8 +33,22 @@ const hasLoadedOptions = ref(false)
 const isSubmitting = ref(false)
 
 const store = useJamaahStore()
-const { occupationOptions, kojaOptions, cabangOptions, statusOptions } = storeToRefs(store)
-const { loadOccupationOptions, loadCabangOptions, loadKojaOptions, addJamaahData } = store
+const { occupationOptions, kojaOptions, cabangOptions, statusOptions, genderOptions } =
+  storeToRefs(store)
+const { loadOccupationOptions, loadCabangOptions, loadKojaOptions, addJamaahData, editJamaahData } =
+  store
+
+const findOptionValue = (options, apiValue, isApiValueLookup = false) => {
+  if (!apiValue) return ''
+
+  if (isApiValueLookup) {
+    const found = options.find((opt) => opt.apiValue === apiValue)
+    return found ? found.value : ''
+  } else {
+    const found = options.find((opt) => opt.label === apiValue)
+    return found ? found.value : ''
+  }
+}
 
 const schema = yup.object({
   name: yup.string().required('Nama wajib diisi'),
@@ -57,7 +70,23 @@ watch(
   () => props.initialData,
   (newVal) => {
     if (props.isEdit && newVal) {
-      initialValues.value = { ...newVal }
+      const findByLabel = (options, label) => {
+        const option = options.find((opt) => opt.label === label)
+        return option ? option.value : ''
+      }
+
+      initialValues.value = {
+        name: newVal.name || '',
+        email: newVal.email || '',
+        phoneNumber: newVal.phoneNumber || '',
+        address: newVal.address || '',
+        birthDate: newVal.birthDate || '',
+        gender: findOptionValue(genderOptions.value, newVal.gender, true) || '',
+        status: findOptionValue(statusOptions.value, newVal.status, true) || '',
+        occupationName: findByLabel(occupationOptions.value, newVal.occupationName) || '',
+        cabangName: findByLabel(cabangOptions.value, newVal.cabangName) || '',
+        kojaName: findByLabel(kojaOptions.value, newVal.kojaName) || '',
+      }
     } else {
       initialValues.value = {
         name: '',
@@ -66,7 +95,7 @@ watch(
         address: '',
         birthDate: '',
         gender: '',
-        status: 'Member',
+        status: '',
         occupationName: '',
         cabangName: '',
         kojaName: '',
@@ -104,14 +133,16 @@ const onSubmit = async (values) => {
       isSubmitting.value = false
     }
   } else {
-    Swal.fire({
-      icon: 'success',
-      title: 'Berhasil!',
-      text: 'Logika Edit akan diimplementasikan nanti.',
-    })
-    isSubmitting.value = false
-    emit('save', values)
-    closeModal()
+    try {
+      const response = await editJamaahData(props.initialData.id, values)
+      if (response?.success) {
+        closeModal()
+      }
+    } catch (error) {
+      console.error('Gagal mengedit jamaah:', error)
+    } finally {
+      isSubmitting.value
+    }
   }
 }
 
@@ -142,11 +173,7 @@ const closeModal = () => {
           <CCol :md="6" class="mb-3">
             <CFormLabel for="gender">Jenis Kelamin</CFormLabel>
             <Field name="gender" v-slot="{ field }">
-              <CFormSelect v-bind="field" id="gender">
-                <option value="" disabled>Pilih Gender</option>
-                <option value="Male">Laki-laki</option>
-                <option value="Female">Perempuan</option>
-              </CFormSelect>
+              <CFormSelect v-bind="field" id="gender" :options="genderOptions" />
             </Field>
             <ErrorMessage name="gender" class="d-block text-danger small m-1" />
           </CCol>

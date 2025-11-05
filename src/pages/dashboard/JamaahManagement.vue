@@ -5,6 +5,7 @@ import { CRow, CCol, CCard, CButton } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { cilPlus } from '@coreui/icons'
 import { storeToRefs } from 'pinia'
+import Swal from 'sweetalert2'
 
 import JamaahTable from '@/pages/dashboard/jamaah-management/JamaahTable.vue'
 import JamaahFilters from '@/pages/dashboard/jamaah-management/JamaahFilters.vue'
@@ -15,7 +16,7 @@ import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
 const store = useJamaahStore()
 
 const { jamaahData, isLoading } = storeToRefs(store)
-const { fetchFilterJamaah } = store
+const { fetchFilterJamaah, deleteJamaahData } = store
 
 const modalVisible = ref(false)
 const isEditMode = ref(false)
@@ -27,7 +28,24 @@ const handleOpenModal = (mode, data = null) => {
   modalVisible.value = true
 }
 
-const handleDeleteJamaah = async (id) => {}
+const handleDeleteJamaah = async (id) => {
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Anda yakin menghapus data ini?',
+    text: 'Data Jamaah yang dihapus tidak dapat dikembalikan!',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Hapus',
+    cancelButtonText: 'Batal',
+  })
+
+  if (result.isConfirmed) {
+    try {
+      await deleteJamaahData(id)
+    } catch (error) {}
+  }
+}
 
 onMounted(() => {
   fetchFilterJamaah()

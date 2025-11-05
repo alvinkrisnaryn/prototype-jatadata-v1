@@ -120,7 +120,7 @@ const onSubmit = async (values) => {
     if (res?.responseCode === 404) {
       Swal.fire({
         icon: 'error',
-        title: 'Login Gagal',
+        title: 'Login Gagal!',
         html: 'Email atau Password salah.',
         confirmButtonText: 'Coba Lagi',
       })

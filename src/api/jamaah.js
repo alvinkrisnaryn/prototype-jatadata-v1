@@ -20,6 +20,13 @@ export async function editJamaah(params) {
 }
 
 export async function deleteJamaah(id) {
-  const response = await api.delete(`${MEMBER_API}/members/${id}`, params)
+  const response = await api.delete(`${MEMBER_API}/members/${id}`)
+
+  if (response.status === 204) {
+    return {
+      responseCode: 204,
+      responseMessage: 'Successfully deleted ',
+    }
+  }
   return response.data
 }

@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import Swal from 'sweetalert2'
 
-import { searchJamaah, addJamaah } from '@/api/jamaah'
+import { searchJamaah, addJamaah, editJamaah, deleteJamaah } from '@/api/jamaah'
 import { getAllKoja } from '@/api/koja'
 import { getAllOccupation } from '@/api/occupations'
 import { getAllCabang } from '@/api/cabang'
@@ -24,8 +24,13 @@ export const useJamaahStore = defineStore('jamaah', () => {
   const cabangOptions = ref([{ value: '', label: 'Semua Cabang' }])
   const statusOptions = ref([
     { value: '', label: 'Semua Status' },
-    { value: 'Member', label: 'Jamaah' },
-    { value: 'Non Member', label: 'Non Jamaah' },
+    { value: 'Member', label: 'Jamaah', apiValue: 'MEMBER' },
+    { value: 'Non Member', label: 'Non Jamaah', apiValue: 'NON_MEMBER' },
+  ])
+  const genderOptions = ref([
+    { value: '', label: 'Pilih Gender' },
+    { value: 'Male', label: 'Laki-laki', apiValue: 'MALE' },
+    { value: 'Female', label: 'Perempuan', apiValue: 'FEMALE' },
   ])
 
   function updateFilter(key, value) {
@@ -173,6 +178,116 @@ export const useJamaahStore = defineStore('jamaah', () => {
     }
   }
 
+  async function editJamaahData(id, values) {
+    try {
+      const payload = {
+        memberName: values.name,
+        memberEmail: values.email,
+        memberNumberPhone: values.phoneNumber,
+        memberAddress: values.address,
+        memberBirthDate: values.birthDate,
+        memberGender: values.gender,
+        memberStatus: values.status,
+        occupationId: values.occupationName,
+        cabangId: values.cabangName,
+        kojaId: values.kojaName,
+      }
+
+      const response = await editJamaah(payload)
+
+      if (response.responseCode === 200) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data Jamaah berhasil diperbarui',
+          confirmButtonText: 'OK',
+        })
+        fetchFilterJamaah()
+        return { success: true }
+      }
+    } catch (err) {
+      const res = err.response?.data
+      const status = err.response?.status
+
+      if (status === 400) {
+        const errorList = res?.errors || []
+        const htmlErrors = errorList.map((e) => `<li>${e}</li>`).join('')
+        Swal.fire({
+          icon: 'error',
+          title: 'Validasi Gagal!',
+          html: `Data yang Anda kirim tidak lengkap: <ul>${htmlErrors}</ul>`,
+          confirmButtonText: 'Perbaiki Data',
+          customClass: {
+            htmlContainer: 'text-start',
+          },
+        })
+      } else if (status === 401 || status === 403) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak!',
+          html: 'Data harus diperbarui oleh Admin.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else if (res?.responseCode === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Data tidak Ditemukan!',
+          html: 'Data yang ingin diperbarui tidak ditemukan.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Terjadi Kesalahan',
+          text: 'Silakan coba beberapa saat lagi.',
+        })
+      }
+      throw err
+    }
+  }
+
+  async function deleteJamaahData(id) {
+    try {
+      const response = await deleteJamaah(id)
+
+      if (response.responseCode === 204) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Data Dihapus!',
+          text: 'Data Jamaah berhasil dihapus',
+          confirmButtonText: 'OK',
+        })
+        fetchFilterJamaah()
+        return { success: true }
+      }
+    } catch (err) {
+      const res = err.response?.data
+
+      if (res?.responseCode === 401) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Anda bukan Admin!',
+          html: 'Data harus dihapus oleh Admin.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else if (res?.responseCode === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Data tidak Ditemukan!',
+          html: 'Data yang ingin hapus tidak ditemukan.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Terjadi Kesalahan',
+          text: 'Silakan coba beberapa saat lagi.',
+        })
+      }
+      throw err
+    }
+  }
+
   return {
     // State
     jamaahData,
@@ -183,6 +298,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
     occupationOptions,
     statusOptions,
     cabangOptions,
+    genderOptions,
     // Actions
     updateFilter,
     fetchFilterJamaah,
@@ -190,5 +306,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
     loadOccupationOptions,
     loadCabangOptions,
     addJamaahData,
+    editJamaahData,
+    deleteJamaahData,
   }
 })
