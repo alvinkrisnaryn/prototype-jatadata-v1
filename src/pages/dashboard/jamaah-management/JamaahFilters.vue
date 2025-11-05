@@ -2,71 +2,23 @@
 import { CFormInput, CFormSelect, CButton } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { cilFilter, cilCloudDownload, cilPrint } from '@coreui/icons'
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import Swal from 'sweetalert2'
+import { storeToRefs } from 'pinia'
 
-import { getAllOccupation } from '@/api/occupations'
-import { getAllKoja } from '@/api/koja'
+import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
 
-const props = defineProps({
-  currentFilters: Object,
-})
-const emit = defineEmits(['update:filters'])
-
-const filters = computed({
-  get: () => props.currentFilters,
-  set: (value) => emit('update:filters', value),
-})
+const store = useJamaahStore()
+const { filterState, kojaOptions, occupationOptions, statusOptions } = storeToRefs(store)
 
 const updateFilter = (key, value) => {
-  filters.value = { ...filters.value, [key]: value }
-}
-
-const kojaOptions = ref([{ value: '', label: 'Semua Koja' }])
-const occupationOptions = ref([{ value: '', label: 'Semua Pekerjaan' }])
-const statusOptions = [
-  { value: '', label: 'Semua Status' },
-  { value: 'MEMBER', label: 'Jamaah' },
-  { value: 'NON_MEMBER', label: 'Non Jamaah' },
-]
-
-const loadOccupationOptions = async () => {
-  try {
-    const data = await getAllOccupation()
-    if (Array.isArray(data) && data.length > 0) {
-      occupationOptions.value = [
-        { value: '', label: 'Semua Pekerjaan' },
-        ...data.map((p) => ({
-          value: p.id,
-          label: `${p.name}`,
-        })),
-      ]
-    }
-  } catch (error) {
-    console.error('Gagal memuat data pekerjaan', error)
-  }
-}
-
-const loadKojaOptions = async () => {
-  try {
-    const data = await getAllKoja()
-    if (Array.isArray(data) && data.length > 0) {
-      kojaOptions.value = [
-        { value: '', label: 'Semua Koja' },
-        ...data.map((k) => ({
-          value: k.uuid,
-          label: `${k.name}`,
-        })),
-      ]
-    }
-  } catch (error) {
-    console.error('Gagal memuat data koja', error)
-  }
+  store.updateFilter(key, value)
+  store.fetchFilterJamaah()
 }
 
 onMounted(() => {
-  loadOccupationOptions()
-  loadKojaOptions()
+  store.loadKojaOptions()
+  store.loadOccupationOptions()
 })
 
 const handleExport = () => {
@@ -94,7 +46,7 @@ const handlePrint = () => {
       <CIcon :icon="cilFilter" class="text-muted" size="lg" />
       <div class="position-relative" style="width: 250px">
         <CFormInput
-          :value="filters.name"
+          :value="filterState.name"
           @input="updateFilter('name', $event.target.value)"
           placeholder="Cari berdasarkan nama"
           class="ps-2"
@@ -103,7 +55,7 @@ const handlePrint = () => {
     </div>
 
     <CFormSelect
-      :value="filters.kojaId"
+      :value="filterState.kojaId"
       @change="updateFilter('kojaId', $event.target.value)"
       :options="kojaOptions"
       class="filter-select"
@@ -111,7 +63,7 @@ const handlePrint = () => {
     />
 
     <CFormSelect
-      :value="filters.occupationId"
+      :value="filterState.occupationId"
       @change="updateFilter('occupationId', $event.target.value)"
       :options="occupationOptions"
       class="filter-select"
@@ -119,7 +71,7 @@ const handlePrint = () => {
     />
 
     <CFormSelect
-      :value="filters.status"
+      :value="filterState.status"
       @change="updateFilter('status', $event.target.value)"
       :options="statusOptions"
       class="filter-select"

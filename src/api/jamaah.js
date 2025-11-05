@@ -13,3 +13,13 @@ export async function addJamaah(params = {}) {
   const response = await api.post(`${MEMBER_API}/members`, params)
   return response.data
 }
+
+export async function editJamaah(params) {
+  const response = await api.patch(`${MEMBER_API}/members/${params.id}`, params)
+  return response.data
+}
+
+export async function deleteJamaah(id) {
+  const response = await api.delete(`${MEMBER_API}/members/${id}`, params)
+  return response.data
+}

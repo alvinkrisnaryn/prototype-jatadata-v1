@@ -17,7 +17,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits('edit', 'delete')
+const emit = defineEmits(['edit', 'delete'])
 const columns = [
   { key: 'no', label: 'No', _style: { width: '5%' } },
   { key: 'name', label: 'Nama', _style: { width: '25%' } },
@@ -60,7 +60,7 @@ const columns = [
           </span>
         </CTableDataCell>
         <CTableDataCell class="d-flex justify-content-center gap-2">
-          <CButton color="info" size="sm" @click="emit('edit', item.id)">
+          <CButton color="info" size="sm" @click="emit('edit', item)">
             <CIcon :icon="cilPencil" />
           </CButton>
           <CButton color="danger" size="sm" @click="emit('delete', item.id)">

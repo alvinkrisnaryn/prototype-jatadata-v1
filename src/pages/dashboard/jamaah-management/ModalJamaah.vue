@@ -17,10 +17,8 @@ import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
 
-import { getAllOccupation } from '@/api/occupations'
-import { getAllKoja } from '@/api/koja'
-import { getAllCabang } from '@/api/cabang'
-import { addJamaah } from '@/api/jamaah'
+import { storeToRefs } from 'pinia'
+import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
 
 const props = defineProps({
   visible: Boolean,
@@ -33,15 +31,11 @@ const title = computed(() => (props.isEdit ? 'Edit Data Jamaah' : 'Tambah Data J
 const buttonText = computed(() => (props.isEdit ? 'Simpan Perubahan' : 'Tambah Jamaah'))
 const initialValues = ref({})
 const hasLoadedOptions = ref(false)
+const isSubmitting = ref(false)
 
-const occupationOptions = ref([{ value: '', label: 'Semua Pekerjaan' }])
-const kojaOptions = ref([{ value: '', label: 'Semua Koja' }])
-const cabangOptions = ref([{ value: '', label: 'Semua Cabang' }])
-const statusOptions = [
-  { value: '', label: 'Semua Status' },
-  { value: 'Member', label: 'Jamaah' },
-  { value: 'Non Member', label: 'Non Jamaah' },
-]
+const store = useJamaahStore()
+const { occupationOptions, kojaOptions, cabangOptions, statusOptions } = storeToRefs(store)
+const { loadOccupationOptions, loadCabangOptions, loadKojaOptions, addJamaahData } = store
 
 const schema = yup.object({
   name: yup.string().required('Nama wajib diisi'),
@@ -72,62 +66,15 @@ watch(
         address: '',
         birthDate: '',
         gender: '',
+        status: 'Member',
+        occupationName: '',
+        cabangName: '',
+        kojaName: '',
       }
     }
   },
   { immediate: true },
 )
-
-const loadOccupationOptions = async () => {
-  try {
-    const data = await getAllOccupation()
-    if (Array.isArray(data) && data.length > 0) {
-      occupationOptions.value = [
-        { value: '', label: 'Semua Pekerjaan' },
-        ...data.map((p) => ({
-          value: p.id,
-          label: `${p.name}`,
-        })),
-      ]
-    }
-  } catch (error) {
-    console.error('Gagal memuat data pekerjaan', error)
-  }
-}
-
-const loadCabangOptions = async () => {
-  try {
-    const data = await getAllCabang()
-    if (Array.isArray(data) && data.length > 0) {
-      cabangOptions.value = [
-        { value: '', label: 'Semua Cabang' },
-        ...data.map((c) => ({
-          value: c.uuid,
-          label: `${c.name}`,
-        })),
-      ]
-    }
-  } catch (error) {
-    console.error('Gagal memuat data cabang', error)
-  }
-}
-
-const loadKojaOptions = async () => {
-  try {
-    const data = await getAllKoja()
-    if (Array.isArray(data) && data.length > 0) {
-      kojaOptions.value = [
-        { value: '', label: 'Semua Koja' },
-        ...data.map((k) => ({
-          value: k.uuid,
-          label: `${k.name}`,
-        })),
-      ]
-    }
-  } catch (error) {
-    console.error('Gagal memuat data koja', error)
-  }
-}
 
 watch(
   () => props.visible,
@@ -136,79 +83,35 @@ watch(
       await Promise.all([loadOccupationOptions(), loadCabangOptions(), loadKojaOptions()])
       hasLoadedOptions.value = true
     }
+    if (!val) {
+      isSubmitting.value = false
+    }
   },
 )
 
 const onSubmit = async (values) => {
-  try {
-    const payload = {
-      memberName: values.name,
-      memberEmail: values.email,
-      memberNumberPhone: values.phoneNumber,
-      memberAddress: values.address,
-      memberBirthDate: values.birthDate,
-      memberGender: values.gender,
-      memberStatus: values.status,
-      occupationId: values.occupationName,
-      cabangId: values.cabangName,
-      kojaId: values.kojaName,
-    }
+  isSubmitting.value = true
 
-    const response = await addJamaah(payload)
-    if (response.responseCode === 200) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Jamaah berhasil ditambahkan',
-        confirmButtonText: 'OK',
-      })
-      emit('save', response.data)
-      closeModal()
-
-      initialValues.value = {
-        name: '',
-        email: '',
-        phoneNumber: '',
-        address: '',
-        birthDate: '',
-        gender: '',
-        status: 'MEMBER',
-        occupationName: '',
-        cabangName: '',
-        kojaName: '',
+  if (!props.isEdit) {
+    try {
+      const response = await addJamaahData(values)
+      if (response?.success) {
+        closeModal()
       }
+    } catch (error) {
+      console.error('Gagal menambah jamaah:', error)
+    } finally {
+      isSubmitting.value = false
     }
-  } catch (err) {
-    const res = err.response?.data
-
-    if (res?.responseCode === 400) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal!',
-        html: 'Anda gagal menambahkan data.',
-        confirmButtonText: 'Coba Lagi',
-      })
-    } else if (res?.responseCode === 403) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Anda bukan Admin!',
-        html: 'Data harus ditambahkan oleh Admin.',
-        confirmButtonText: 'Coba Lagi',
-      })
-    } else if (res?.responseCode === 409) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Data Tersedia!',
-        html: 'Data yang anda tambahkan sudah ada.',
-        confirmButtonText: 'Coba Lagi',
-      })
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Terjadi Kesalahan',
-        text: 'Silakan coba beberapa saat lagi.',
-      })
-    }
+  } else {
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Logika Edit akan diimplementasikan nanti.',
+    })
+    isSubmitting.value = false
+    emit('save', values)
+    closeModal()
   }
 }
 
@@ -343,7 +246,9 @@ const closeModal = () => {
       </CModalBody>
       <CModalFooter>
         <CButton class="btn-batal" @click="closeModal">Batal</CButton>
-        <CButton class="btn-tambah-jamaah" type="submit">{{ buttonText }}</CButton>
+        <CButton class="btn-tambah-jamaah" type="submit" :disabled="isSubmitting">{{
+          isSubmitting ? 'Memproses...' : buttonText
+        }}</CButton>
       </CModalFooter>
     </Form>
   </CModal>
