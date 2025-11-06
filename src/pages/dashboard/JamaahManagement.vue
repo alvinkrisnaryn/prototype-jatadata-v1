@@ -6,6 +6,7 @@ import CIcon from '@coreui/icons-vue'
 import { cilPlus } from '@coreui/icons'
 import { storeToRefs } from 'pinia'
 import Swal from 'sweetalert2'
+import { useRouter } from 'vue-router'
 
 import JamaahTable from '@/pages/dashboard/jamaah-management/JamaahTable.vue'
 import JamaahFilters from '@/pages/dashboard/jamaah-management/JamaahFilters.vue'
@@ -14,6 +15,7 @@ import ModalJamaah from '@/pages/dashboard/jamaah-management/ModalJamaah.vue'
 import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
 
 const store = useJamaahStore()
+const router = useRouter()
 
 const { jamaahData, isLoading } = storeToRefs(store)
 const { fetchFilterJamaah, deleteJamaahData } = store
@@ -26,6 +28,10 @@ const handleOpenModal = (mode, data = null) => {
   isEditMode.value = mode === 'edit'
   currentJamaah.value = data
   modalVisible.value = true
+}
+
+const handleViewDetail = (id) => {
+  router.push({ name: 'JamaahDetail', params: { id } })
 }
 
 const handleDeleteJamaah = async (id) => {
@@ -76,6 +82,7 @@ onMounted(() => {
             :data="jamaahData"
             @edit="handleOpenModal('edit', $event)"
             @delete="handleDeleteJamaah"
+            @view-detail="handleViewDetail"
           />
           <div v-else class="text-center py-5 text-muted">Memuat data jamaah...</div>
         </CCard>

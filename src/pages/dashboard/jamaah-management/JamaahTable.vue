@@ -8,7 +8,7 @@ import {
   CTableDataCell,
 } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
-import { cilPencil, cilTrash } from '@coreui/icons'
+import { cilPencil, cilTrash, cilMagnifyingGlass } from '@coreui/icons'
 
 const props = defineProps({
   data: {
@@ -17,15 +17,15 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete', 'view-detail'])
 const columns = [
   { key: 'no', label: 'No', _style: { width: '5%' } },
   { key: 'name', label: 'Nama', _style: { width: '25%' } },
-  { key: 'phoneNumber', label: 'No Telp', _style: { width: '15%' } },
+  { key: 'phoneNumber', label: 'No. Telepon', _style: { width: '15%' } },
   { key: 'occupationName', label: 'Pekerjaan', _style: { width: '20%' } },
   { key: 'kojaName', label: 'Koja', _style: { width: '10%' } },
   { key: 'status', label: 'Status', _style: { width: '15%' } },
-  { key: 'aksi', label: 'Aksi', _style: { width: '10%' } },
+  { key: 'aksi', label: 'Aksi', _style: { width: '15%' } },
 ]
 </script>
 
@@ -44,8 +44,8 @@ const columns = [
         <CTableDataCell>{{ index + 1 }}</CTableDataCell>
         <CTableDataCell class="fw-semibold">{{ item.name }}</CTableDataCell>
         <CTableDataCell>{{ item.phoneNumber }}</CTableDataCell>
-        <CTableDataCell>{{ item.occupationName }}</CTableDataCell>
-        <CTableDataCell>{{ item.kojaName }}</CTableDataCell>
+        <CTableDataCell>{{ item.occupation?.name }}</CTableDataCell>
+        <CTableDataCell>{{ item.koja?.name }}</CTableDataCell>
         <CTableDataCell>
           <span
             :class="[
@@ -60,6 +60,14 @@ const columns = [
           </span>
         </CTableDataCell>
         <CTableDataCell class="d-flex justify-content-center gap-2">
+          <CButton
+            color="primary"
+            size="sm"
+            @click="emit('view-detail', item.id)"
+            title="Lihat Detail"
+          >
+            <CIcon :icon="cilMagnifyingGlass" />
+          </CButton>
           <CButton color="info" size="sm" @click="emit('edit', item)">
             <CIcon :icon="cilPencil" />
           </CButton>

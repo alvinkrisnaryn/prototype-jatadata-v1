@@ -14,6 +14,11 @@ export async function addJamaah(params = {}) {
   return response.data
 }
 
+export async function showJamaah(id) {
+  const response = await api.get(`${MEMBER_API}/members/${id}`)
+  return response.data
+}
+
 export async function editJamaah(params) {
   const response = await api.patch(`${MEMBER_API}/members/${params.id}`, params)
   return response.data

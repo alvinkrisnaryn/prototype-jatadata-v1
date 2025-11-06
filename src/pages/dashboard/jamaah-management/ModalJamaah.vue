@@ -50,6 +50,11 @@ const findOptionValue = (options, apiValue, isApiValueLookup = false) => {
   }
 }
 
+const findByLabel = (options, label) => {
+  const option = options.find((opt) => opt.label === label)
+  return option ? option.value : ''
+}
+
 const schema = yup.object({
   name: yup.string().required('Nama wajib diisi'),
   phoneNumber: yup
@@ -70,11 +75,6 @@ watch(
   () => props.initialData,
   (newVal) => {
     if (props.isEdit && newVal) {
-      const findByLabel = (options, label) => {
-        const option = options.find((opt) => opt.label === label)
-        return option ? option.value : ''
-      }
-
       initialValues.value = {
         name: newVal.name || '',
         email: newVal.email || '',
@@ -83,9 +83,9 @@ watch(
         birthDate: newVal.birthDate || '',
         gender: findOptionValue(genderOptions.value, newVal.gender, true) || '',
         status: findOptionValue(statusOptions.value, newVal.status, true) || '',
-        occupationName: findByLabel(occupationOptions.value, newVal.occupationName) || '',
-        cabangName: findByLabel(cabangOptions.value, newVal.cabangName) || '',
-        kojaName: findByLabel(kojaOptions.value, newVal.kojaName) || '',
+        occupationName: findByLabel(occupationOptions.value, newVal.occupation?.name) || '',
+        cabangName: findByLabel(cabangOptions.value, newVal.cabang?.name) || '',
+        kojaName: findByLabel(kojaOptions.value, newVal.koja?.name) || '',
       }
     } else {
       initialValues.value = {
@@ -112,9 +112,22 @@ watch(
       await Promise.all([loadOccupationOptions(), loadCabangOptions(), loadKojaOptions()])
       hasLoadedOptions.value = true
     }
-    if (!val) {
-      isSubmitting.value = false
+    if (val && props.isEdit && props.initialData) {
+      const newVal = props.initialData
+      initialValues.value = {
+        name: newVal.name || '',
+        email: newVal.email || '',
+        phoneNumber: newVal.phoneNumber || '',
+        address: newVal.address || '',
+        birthDate: newVal.birthDate || '',
+        gender: findOptionValue(genderOptions.value, newVal.gender, true) || '',
+        status: findOptionValue(statusOptions.value, newVal.status, true) || '',
+        occupationName: findByLabel(occupationOptions.value, newVal.occupation?.name) || '',
+        cabangName: findByLabel(cabangOptions.value, newVal.cabang?.name) || '',
+        kojaName: findByLabel(kojaOptions.value, newVal.koja?.name) || '',
+      }
     }
+    if (!val) isSubmitting.value = false
   },
 )
 
@@ -141,7 +154,7 @@ const onSubmit = async (values) => {
     } catch (error) {
       console.error('Gagal mengedit jamaah:', error)
     } finally {
-      isSubmitting.value
+      isSubmitting.value = false
     }
   }
 }

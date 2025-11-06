@@ -2,14 +2,16 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import Swal from 'sweetalert2'
 
-import { searchJamaah, addJamaah, editJamaah, deleteJamaah } from '@/api/jamaah'
+import { searchJamaah, addJamaah, editJamaah, deleteJamaah, showJamaah } from '@/api/jamaah'
 import { getAllKoja } from '@/api/koja'
 import { getAllOccupation } from '@/api/occupations'
 import { getAllCabang } from '@/api/cabang'
 
 export const useJamaahStore = defineStore('jamaah', () => {
   const jamaahData = ref([])
+  const singleJamaah = ref(null)
   const isLoading = ref(false)
+  const isDetailLoading = ref(false)
   const totalData = ref(0)
 
   const filterState = ref({
@@ -32,6 +34,10 @@ export const useJamaahStore = defineStore('jamaah', () => {
     { value: 'Male', label: 'Laki-laki', apiValue: 'MALE' },
     { value: 'Female', label: 'Perempuan', apiValue: 'FEMALE' },
   ])
+  const getApiValue = (options, vueValue) => {
+    const option = options.find((opt) => opt.value === vueValue)
+    return option?.apiValue || vueValue
+  }
 
   function updateFilter(key, value) {
     filterState.value[key] = value
@@ -44,7 +50,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
         name: filterState.value.name || '',
         kojaId: filterState.value.kojaId || '',
         occupationId: filterState.value.occupationId || '',
-        status: filterState.value.status || '',
+        status: getApiValue(statusOptions.value, filterState.value.status) || '',
       }
 
       const response = await searchJamaah(params)
@@ -181,6 +187,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
   async function editJamaahData(id, values) {
     try {
       const payload = {
+        id: id,
         memberName: values.name,
         memberEmail: values.email,
         memberNumberPhone: values.phoneNumber,
@@ -193,7 +200,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
         kojaId: values.kojaName,
       }
 
-      const response = await editJamaah(payload)
+      const response = await editJamaah({ id, ...payload })
 
       if (response.responseCode === 200) {
         Swal.fire({
@@ -243,6 +250,54 @@ export const useJamaahStore = defineStore('jamaah', () => {
         })
       }
       throw err
+    }
+  }
+
+  async function showJamaahData(id) {
+    if (!id) return
+
+    try {
+      isDetailLoading.value = true
+      const response = await showJamaah({ id })
+
+      if (response.responseCode === 200) {
+        singleJamaah.value = response.data
+      } else {
+        singleJamaah.value = null
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Tidak Valid',
+          text: 'Respons data tidak valid.',
+        })
+      }
+    } catch (error) {
+      const status = error.response?.status
+      const res = error.response?.data
+      singleJamaah.value = null
+
+      if (res?.responseCode === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Tidak Ditemukan!',
+          html: 'Data Jamaah tidak ditemukan.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else if (status === 401 || status === 403) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Anda bukan Admin!',
+          html: 'Data harus dihapus oleh Admin.',
+          confirmButtonText: 'Coba Lagi',
+        })
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Memuat Detail',
+          text: 'Terjadi kesalahan saat mengambil data dari server.',
+        })
+      }
+    } finally {
+      isDetailLoading.value = false
     }
   }
 
@@ -307,6 +362,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
     loadCabangOptions,
     addJamaahData,
     editJamaahData,
+    showJamaahData,
     deleteJamaahData,
   }
 })

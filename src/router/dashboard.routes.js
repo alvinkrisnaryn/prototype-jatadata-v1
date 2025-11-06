@@ -1,5 +1,6 @@
 import Home from '@/pages/dashboard/Home.vue'
 import JamaahManagement from '@/pages/dashboard/JamaahManagement.vue'
+import JamaahDetail from '@/pages/dashboard/jamaah-management/JamaahDetail.vue'
 import MasterData from '@/pages/dashboard/MasterData.vue'
 import Report from '@/pages/dashboard/Report.vue'
 
@@ -14,6 +15,12 @@ export default [
     path: '/jamaah-management',
     name: 'JamaahManagement',
     component: JamaahManagement,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/jamaah-management/:id',
+    name: 'JamaahDetail',
+    component: JamaahDetail,
     meta: { requiresAuth: true },
   },
   {
