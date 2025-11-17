@@ -323,12 +323,4 @@ input:focus,
 .text-muted-light {
   color: rgba(108, 117, 125, 0.8);
 }
-
-input[type='password'] {
-  color: #374151;
-}
-
-input[type='password']:-webkit-autofill {
-  -webkit-text-fill-color: #374151 !important;
-}
 </style>

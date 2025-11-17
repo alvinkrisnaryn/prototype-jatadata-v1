@@ -218,11 +218,29 @@ export const useJamaahStore = defineStore('jamaah', () => {
 
       if (status === 400) {
         const errorList = res?.errors || []
-        const htmlErrors = errorList.map((e) => `<li>${e}</li>`).join('')
+        const formattedErrors = errorList
+          .map((e) => {
+            let cleanMessage = e.trim().replace(/^.+: /, '')
+            return `<li>${cleanMessage}</li>`
+          })
+          .join('')
+
+        const defaultMessage = 'Silahkan periksa kembali semua kolom input.'
+
         Swal.fire({
           icon: 'error',
-          title: 'Validasi Gagal!',
-          html: `Data yang Anda kirim tidak lengkap: <ul>${htmlErrors}</ul>`,
+          title: 'Gagal Memperbarui Data!',
+          html: `
+            <p style="text-align: center; margin-bottom: 1rem; font-weight: 500;">
+              Terjadi kesalahan saat memproses data. Beberapa kolom tidak valid:
+            </p>
+            <ul style="text-align: left; padding-left: 20px; color: #dc3545;">
+              ${formattedErrors.length > 0 ? formattedErrors : `<li>${defaultMessage}</li>`}
+            </ul>
+            <p style="text-align: center; margin-top: 1rem;">
+              Mohon **Perbaiki Data** dan coba simpan kembali.
+            </p>
+          `,
           confirmButtonText: 'Perbaiki Data',
           customClass: {
             htmlContainer: 'text-start',
@@ -258,7 +276,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
 
     try {
       isDetailLoading.value = true
-      const response = await showJamaah({ id })
+      const response = await showJamaah(id)
 
       if (response.responseCode === 200) {
         singleJamaah.value = response.data
@@ -346,7 +364,9 @@ export const useJamaahStore = defineStore('jamaah', () => {
   return {
     // State
     jamaahData,
+    singleJamaah,
     isLoading,
+    isDetailLoading,
     totalData,
     filterState,
     kojaOptions,

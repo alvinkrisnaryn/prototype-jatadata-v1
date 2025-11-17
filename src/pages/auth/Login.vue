@@ -337,24 +337,4 @@ input:focus,
 .text-muted-light {
   color: rgba(108, 117, 125, 0.8);
 }
-
-input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
-  box-shadow: 0 0 0 1000px #fff inset !important;
-  -webkit-text-fill-color: #374151 !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-input:-moz-autofill {
-  box-shadow: 0 0 0 1000px #fff inset !important;
-  -moz-text-fill-color: #374151 !important;
-}
-
-input[type='password'] {
-  color: #374151;
-}
-
-input[type='password']:-webkit-autofill {
-  -webkit-text-fill-color: #374151 !important;
-}
 </style>

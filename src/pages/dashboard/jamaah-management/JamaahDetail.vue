@@ -1,10 +1,9 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { CCard, CCardBody, CRow, CCol, CButton } from '@coreui/vue'
 import { cilArrowLeft } from '@coreui/icons'
-import Swal from 'sweetalert2'
 
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import JamaahDetailCard from '@/pages/dashboard/jamaah-management/JamaahDetailCard.vue'
@@ -14,24 +13,13 @@ const route = useRoute()
 const router = useRouter()
 const store = useJamaahStore()
 const { singleJamaah, isDetailLoading } = storeToRefs(store)
-const { showJamaahDetail } = store
+const { showJamaahData } = store
 
 const jamaahId = ref(route.params.id)
 
 const loadData = async (id) => {
-  store.singleJamaah = null
-  await showJamaahDetail(id)
-
-  if (!isDetailLoading.value && !singleJamaah.value) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Data Tidak Ditemukan',
-      text: 'Mengalihkan kembali ke Manajemen Jamaah.',
-      confirmButtonText: 'OK',
-    }).then(() => {
-      router.push({ name: 'JamaahManagement' })
-    })
-  }
+  singleJamaah.value = {}
+  await showJamaahData(id)
 }
 
 onMounted(() => {

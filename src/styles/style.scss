@@ -91,7 +91,6 @@ body {
   border: none !important;
 }
 
-
 .sidebar-nav a,
 .sidebar-nav a:hover,
 .sidebar-nav a:focus {
@@ -123,5 +122,30 @@ body {
       color: #fff !important;
       font-weight: 700 !important;
     }
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--cui-body-bg) inset !important;
+  -webkit-text-fill-color: #374152 !important;
+  box-shadow: 0 0 0 1000px var(--cui-body-bg) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+inpur[type='password']-webkit-autofill {
+  -webkit-text-fill-color: #374152 !important;
+}
+
+@include color-mode(dark) {
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--cui-body-bg) inset !important;
+    -webkit-text-fill-color: var(--cui-body-color) !important;
+    box-shadow: 0 0 0 1000px var(--cui-body-bg) inset !important;
   }
 }

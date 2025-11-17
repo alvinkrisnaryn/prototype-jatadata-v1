@@ -32,23 +32,23 @@ const formatGender = (gender) => {
           <h6 class="text-primary mb-3">Informasi Jamaah</h6>
           <CListGroup flush>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Nama Lengkap:</span>
+              <span class="fw-semibold">Nama Lengkap :</span>
               <span class="text-end">{{ jamaah.name || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Jenis Kelamin:</span>
+              <span class="fw-semibold">Jenis Kelamin :</span>
               <span class="text-end">{{ formatGender(jamaah.gender) || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Tanggal Lahir:</span>
+              <span class="fw-semibold">Tanggal Lahir :</span>
               <span class="text-end">{{ jamaah.birthDate || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Pekerjaan:</span>
-              <span class="text-end">{{ jamaah.occupationName || '-' }}</span>
+              <span class="fw-semibold">Pekerjaan :</span>
+              <span class="text-end">{{ jamaah.occupation?.name || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold mb-1">Alamat:</span>
+              <span class="fw-semibold mb-1">Alamat :</span>
               <span class="text-muted small">{{ jamaah.address || '-' }}</span>
             </CListGroupItem>
           </CListGroup>
@@ -58,7 +58,7 @@ const formatGender = (gender) => {
           <h6 class="text-primary mb-3">Kontak & Keanggotaan</h6>
           <CListGroup flush>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Status:</span>
+              <span class="fw-semibold">Status :</span>
               <span
                 :class="[
                   'badge',
@@ -72,23 +72,19 @@ const formatGender = (gender) => {
               </span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Cabang:</span>
-              <span class="text-end">{{ jamaah.cabangName || '-' }}</span>
+              <span class="fw-semibold">Cabang :</span>
+              <span class="text-end">{{ jamaah.cabang?.name || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Koja:</span>
-              <span class="text-end">{{ jamaah.kojaName || '-' }}</span>
+              <span class="fw-semibold">Koja :</span>
+              <span class="text-end">{{ jamaah.koja?.name || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Koja:</span>
-              <span class="text-end">{{ jamaah.kojaName || '-' }}</span>
-            </CListGroupItem>
-            <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">Email:</span>
+              <span class="fw-semibold">Email :</span>
               <span class="text-end">{{ jamaah.email || '-' }}</span>
             </CListGroupItem>
             <CListGroupItem class="d-flex justify-content-between py-2">
-              <span class="fw-semibold">No. Telepon:</span>
+              <span class="fw-semibold">No. Telepon :</span>
               <span class="text-end">{{ jamaah.phoneNumber || '-' }}</span>
             </CListGroupItem>
           </CListGroup>
