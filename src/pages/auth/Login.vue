@@ -1,7 +1,7 @@
 <script setup>
 import { CButton, CCard } from '@coreui/vue'
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
@@ -56,9 +56,9 @@ function finishCountdown() {
   remainingTime = 0
   localStorage.removeItem('cooldownEndTime')
   Swal.fire({
-    title: 'Waktu tunggu berakhir',
-    text: 'Sekarang anda dapat login kembali',
     icon: 'info',
+    title: 'Informasi',
+    text: 'Waktu tunggu berakhir! Silahkan login kembali',
     confirmButtonText: 'OK',
   })
 }
@@ -106,10 +106,11 @@ const onSubmit = async (values) => {
       localStorage.removeItem('cooldownEndtime')
 
       Swal.fire({
-        title: 'Login Berhasil',
-        text: `Selamat datang, ${data.username}!`,
         icon: 'success',
+        title: 'Berhasil',
+        text: `Selamat datang, ${data.username}!`,
         confirmButtonText: 'OK',
+        timer: 4000,
       })
       router.push('/home')
     }
@@ -119,8 +120,8 @@ const onSubmit = async (values) => {
     if (res?.responseCode === 404) {
       Swal.fire({
         icon: 'error',
-        title: 'Login Gagal!',
-        html: 'Email atau Password salah.',
+        title: 'Gagal',
+        text: 'Email atau Password salah.',
         confirmButtonText: 'Coba Lagi',
       })
     }
@@ -128,8 +129,8 @@ const onSubmit = async (values) => {
     if (res?.responseCode === 423) {
       Swal.fire({
         icon: 'warning',
-        title: 'Akun Terkunci Sementara',
-        html: `Silakan coba dalam ${res.lockedTime} detik.`,
+        title: 'Peringatan',
+        text: `Silakan coba lagi dalam ${res.lockedTime} detik.`,
         confirmButtonText: 'OK',
       })
       const end = Date.now() + res.lockedTime * 1000

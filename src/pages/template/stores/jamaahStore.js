@@ -73,11 +73,11 @@ export const useJamaahStore = defineStore('jamaah', () => {
         jamaahData.value = []
       }
     } catch (error) {
-      console.error('Gagal memuat data jamaah:', error)
       Swal.fire({
         icon: 'error',
-        title: 'Gagal Memuat Data',
+        title: 'Gagal',
         text: 'Terjadi kesalahan saat mengambil data dari server.',
+        confirmButtonText: 'OK',
       })
     } finally {
       isLoading.value = false
@@ -155,9 +155,10 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (response.responseCode === 200) {
         Swal.fire({
           icon: 'success',
-          title: 'Berhasil!',
+          title: 'Berhasil',
           text: 'Data Jamaah berhasil ditambahkan',
           confirmButtonText: 'OK',
+          timer: 4000,
         })
         fetchFilterJamaah()
         return { success: true, data: response.data }
@@ -168,29 +169,34 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (res?.responseCode === 400) {
         Swal.fire({
           icon: 'error',
-          title: 'Gagal!',
-          html: 'Anda gagal menambahkan data.',
+          title: 'Gagal',
+          text: 'Anda gagal menambahkan data.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else if (res?.responseCode === 403) {
         Swal.fire({
           icon: 'error',
-          title: 'Anda bukan Admin!',
-          html: 'Data harus ditambahkan oleh Admin.',
+          title: 'Gagal',
+          html: 'Anda bukan Admin!<br>Data harus ditambahkan oleh Admin.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else if (res?.responseCode === 409) {
         Swal.fire({
           icon: 'error',
-          title: 'Data Tersedia!',
-          html: 'Data yang anda tambahkan sudah ada.',
+          title: 'Gagal',
+          text: 'Data yang anda tambahkan sudah ada.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else {
         Swal.fire({
           icon: 'error',
           title: 'Terjadi Kesalahan',
           text: 'Silakan coba beberapa saat lagi.',
+          confirmButtonText: 'OK',
+          timer: 4000,
         })
       }
       throw err
@@ -218,9 +224,10 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (response.responseCode === 200) {
         Swal.fire({
           icon: 'success',
-          title: 'Berhasil!',
+          title: 'Berhasil',
           text: 'Data Jamaah berhasil diperbarui',
           confirmButtonText: 'OK',
+          timer: 4000,
         })
         fetchFilterJamaah()
         return { success: true }
@@ -242,19 +249,28 @@ export const useJamaahStore = defineStore('jamaah', () => {
 
         Swal.fire({
           icon: 'error',
-          title: 'Gagal Memperbarui Data!',
+          title: 'Gagal Memperbarui Data',
           html: `
-            <p style="text-align: center; margin-bottom: 1rem; font-weight: 500;">
-              Terjadi kesalahan saat memproses data. Beberapa kolom tidak valid:
-            </p>
-            <ul style="text-align: left; padding-left: 20px; color: #dc3545;">
-              ${formattedErrors.length > 0 ? formattedErrors : `<li>${defaultMessage}</li>`}
-            </ul>
-            <p style="text-align: center; margin-top: 1rem;">
-              Mohon **Perbaiki Data** dan coba simpan kembali.
-            </p>
-          `,
-          confirmButtonText: 'Perbaiki Data',
+    <div style="margin-bottom: 1rem; font-size: 15px; line-height: 1.5;">
+      Beberapa data tidak dapat diproses karena terdapat isian yang tidak valid.
+      Silakan cek kembali detail berikut:
+    </div>
+
+    <ul style="
+      text-align: left;
+      padding-left: 18px;
+      color: #dc3545;
+      margin-bottom: 1rem;
+      font-size: 14px;
+    ">
+      ${formattedErrors.length > 0 ? formattedErrors : `<li>${defaultMessage}</li>`}
+    </ul>
+
+    <div style="font-size: 14px; color: #444;">
+      Setelah diperbaiki, lakukan penyimpanan ulang.
+    </div>
+  `,
+          confirmButtonText: 'Perbaiki Sekarang',
           customClass: {
             htmlContainer: 'text-start',
           },
@@ -262,22 +278,26 @@ export const useJamaahStore = defineStore('jamaah', () => {
       } else if (status === 401 || status === 403) {
         Swal.fire({
           icon: 'error',
-          title: 'Akses Ditolak!',
-          html: 'Data harus diperbarui oleh Admin.',
+          title: 'Gagal',
+          html: 'Anda bukan Admin!<br>Data harus diperbarui oleh Admin.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else if (res?.responseCode === 404) {
         Swal.fire({
           icon: 'error',
-          title: 'Data tidak Ditemukan!',
-          html: 'Data yang ingin diperbarui tidak ditemukan.',
+          title: 'Gagal',
+          text: 'Data yang ingin diperbarui tidak ditemukan.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Terjadi Kesalahan',
+          title: 'Gagal',
           text: 'Silakan coba beberapa saat lagi.',
+          confirmButtonText: 'OK',
+          timer: 4000,
         })
       }
       throw err
@@ -297,8 +317,10 @@ export const useJamaahStore = defineStore('jamaah', () => {
         singleJamaah.value = null
         Swal.fire({
           icon: 'warning',
-          title: 'Data Tidak Valid',
-          text: 'Respons data tidak valid.',
+          title: 'Peringatan',
+          text: 'Data Jamaah tidak ditemukan.',
+          confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       }
     } catch (error) {
@@ -309,22 +331,24 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (res?.responseCode === 404) {
         Swal.fire({
           icon: 'error',
-          title: 'Tidak Ditemukan!',
-          html: 'Data Jamaah tidak ditemukan.',
+          title: 'Gagal',
+          text: 'Data Jamaah tidak ditemukan.',
           confirmButtonText: 'Coba Lagi',
         })
       } else if (status === 401 || status === 403) {
         Swal.fire({
           icon: 'error',
-          title: 'Anda bukan Admin!',
-          html: 'Data harus dihapus oleh Admin.',
+          title: 'Gagal',
+          html: 'Anda bukan Admin!<br>Data dapat diakses oleh Admin.',
           confirmButtonText: 'Coba Lagi',
         })
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Gagal Memuat Detail',
+          title: 'Gagal',
           text: 'Terjadi kesalahan saat mengambil data dari server.',
+          confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       }
     } finally {
@@ -339,7 +363,7 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (response.responseCode === 204) {
         await Swal.fire({
           icon: 'success',
-          title: 'Data Dihapus!',
+          title: 'Berhasil',
           text: 'Data Jamaah berhasil dihapus',
           confirmButtonText: 'OK',
         })
@@ -352,22 +376,26 @@ export const useJamaahStore = defineStore('jamaah', () => {
       if (res?.responseCode === 401) {
         Swal.fire({
           icon: 'error',
-          title: 'Anda bukan Admin!',
-          html: 'Data harus dihapus oleh Admin.',
+          title: 'Gagal',
+          html: 'Anda bukan Admin!<br>Data dapat dihapus oleh Admin.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else if (res?.responseCode === 404) {
         Swal.fire({
           icon: 'error',
-          title: 'Data tidak Ditemukan!',
-          html: 'Data yang ingin hapus tidak ditemukan.',
+          title: 'Gagal',
+          text: 'Data yang ingin hapus tidak ditemukan.',
           confirmButtonText: 'Coba Lagi',
+          timer: 4000,
         })
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Terjadi Kesalahan',
+          title: 'Gagal',
           text: 'Silakan coba beberapa saat lagi.',
+          confirmButtonText: 'OK',
+          timer: 4000,
         })
       }
       throw err

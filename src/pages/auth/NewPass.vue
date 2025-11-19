@@ -1,6 +1,6 @@
 <script setup>
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { CButton, CCard } from '@coreui/vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
@@ -57,8 +57,10 @@ const onSubmit = async (values) => {
     if (res.responseCode === 200) {
       Swal.fire({
         icon: 'success',
-        title: 'Password berhasil diubah!',
-        text: 'Silakan login dengan password baru Anda.' || response.responseMessage,
+        title: 'Berhasil',
+        html: 'Password berhasil diubah!<br>Silahkan login kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         localStorage.removeItem('resetEmail')
         localStorage.removeItem('otpExpireAt')
@@ -72,27 +74,33 @@ const onSubmit = async (values) => {
     if (res?.responseCode === 400) {
       Swal.fire({
         icon: 'error',
-        title: 'Password Tidak Valid!',
+        title: 'Gagal',
         html: 'Password yang anda masukkan tidak sama.',
         confirmButtonText: 'Coba Lagi',
       })
     } else if (res?.responseCode === 404) {
       Swal.fire({
         icon: 'warning',
-        title: 'Email Tidak Ditemukan!',
-        text: 'Silakan masukkan email kembali.',
+        title: 'Peringatan',
+        html: 'Email tidak ditemukan!<br>Silakan masukkan email kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => router.push('/forgot-password'))
     } else if (res?.responseCode === 410) {
       Swal.fire({
         icon: 'info',
-        title: 'Kode OTP Kadaluarsa!',
+        title: 'Informasi',
         text: 'Silakan masukkan email kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => router.push('/forgot-password'))
     } else {
       Swal.fire({
         icon: 'error',
-        title: 'Terjadi Kesalahan',
+        title: 'Gagal',
         text: 'Silakan coba beberapa saat lagi.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       })
     }
   }
@@ -109,8 +117,10 @@ function startOtpTimer(seconds) {
       localStorage.removeItem('otpExpireAt')
       Swal.fire({
         icon: 'info',
-        title: 'Kode OTP Kadaluarsa!',
-        text: 'Silakan masukkan email kembali.',
+        title: 'Informasi',
+        html: 'Kode OTP Kadaluarsa!<br>Silakan masukkan email kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         router.push('/forgot-password')
       })
@@ -125,8 +135,10 @@ onMounted(() => {
   if (!remaining || remaining <= 0) {
     Swal.fire({
       icon: 'info',
-      title: 'Kode OTP Kadaluarsa!',
-      text: 'Silakan masukkan email kembali.',
+      title: 'Perhatian',
+      html: 'Kode OTP Kadaluarsa!<br>Silakan masukkan email kembali.',
+      confirmButtonText: 'OK',
+      timer: 4000,
     }).then(() => {
       localStorage.removeItem('otpExpireAt')
       router.push('/forgot-password')

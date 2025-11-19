@@ -46,8 +46,10 @@ const onSubmit = async (values) => {
 
       Swal.fire({
         icon: 'success',
-        title: 'OTP Dikirim!',
+        title: 'Berhasil',
         text: `Kode OTP telah dikirim ke email ${values.email}`,
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         router.push('/validate-otp')
       })
@@ -58,9 +60,10 @@ const onSubmit = async (values) => {
     if (res?.responseCode === 404) {
       Swal.fire({
         icon: 'error',
-        title: 'Email Tidak Ditemukan',
-        html: 'Email yang anda gunakan tidak terdaftar!',
+        title: 'Gagal',
+        text: 'Email yang anda gunakan tidak terdaftar!',
         confirmButtonText: 'Coba Lagi',
+        timer: 4000,
       })
     }
   } finally {

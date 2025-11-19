@@ -17,16 +17,17 @@ async function handleLogout() {
     sessionStorage.clear()
 
     Swal.fire({
-      title: 'Logout Berhasil',
-      html: 'Anda berhasil keluar.',
       icon: 'success',
+      title: 'Berhasil',
+      html: 'Anda berhasil keluar.',
       confirmButtonText: 'OK',
+      timer: 4000,
     }).then(() => router.push('/login'))
   } catch (err) {
     Swal.fire({
-      title: 'Terjadi Kesalahan',
-      html: 'Gagal melakukan logout, silakan coba lagi.',
       icon: 'error',
+      title: 'Gagal',
+      text: 'Silakan coba beberapa saat lagi.',
       confirmButtonText: 'OK',
     })
   }

@@ -1,7 +1,7 @@
 <script setup>
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
 import { useRouter } from 'vue-router'
-import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { CButton, CCard } from '@coreui/vue'
 import Swal from 'sweetalert2'
 import { validateOtp, forgotPassword } from '@/api/auth'
@@ -46,8 +46,10 @@ async function handleSubmitOtp() {
   if (otpCode.length < 4) {
     Swal.fire({
       icon: 'error',
-      title: 'OTP Salah',
+      title: 'Gagal',
       text: 'Masukkan 4 digit kode OTP!',
+      confirmButtonText: 'OK',
+      timer: 4000,
     })
     return
   }
@@ -58,8 +60,10 @@ async function handleSubmitOtp() {
     if (res.responseCode === 200) {
       Swal.fire({
         icon: 'success',
-        title: 'OTP Berhasil!',
-        text: 'Kode OTP berhasil diverifikasi.' || response.responseMessage,
+        title: 'Berhasil',
+        text: 'Kode OTP berhasil diverifikasi.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         localStorage.setItem('otpVerified', 'true')
         otp.value = ['', '', '', '']
@@ -72,29 +76,36 @@ async function handleSubmitOtp() {
     if (res?.responseCode === 400) {
       Swal.fire({
         icon: 'error',
-        title: 'OTP Tidak Valid!',
-        html: 'Kode OTP salah atau kadaluarsa.',
+        title: 'Gagal',
+        text: 'Kode OTP salah atau telah kadaluarsa.',
         confirmButtonText: 'Coba Lagi',
+        timer: 4000,
       })
     } else if (res?.responseCode === 404) {
       Swal.fire({
         icon: 'warning',
-        title: 'Email Tidak Ditemukan!',
-        html: 'Email anda tidak terdaftar.',
+        title: 'Peringatan',
+        text: 'Email anda tidak terdaftar.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       })
     } else if (res?.responseCode === 410) {
       Swal.fire({
         icon: 'info',
-        title: 'Kode OTP Kadaluarsa!',
-        html: 'Silahkan masukkan email kembali.',
+        title: 'Informasi',
+        html: 'Kode OTP Kadaluarsa!<br>Silakan masukkan email kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         router.push('/forgot-password')
       })
     } else {
       Swal.fire({
         icon: 'error',
-        title: 'Terjadi Kesalahan',
+        title: 'Gagal',
         text: 'Silakan coba beberapa saat lagi.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       })
     }
   }
@@ -121,8 +132,10 @@ async function handleResendOtp() {
     if (res.responseCode === 200) {
       Swal.fire({
         icon: 'success',
-        title: 'OTP Dikirim Ulang!',
-        html: 'Kode OTP telah dikirim ke email Anda.' || res.responseMessage,
+        title: 'Berhasil',
+        text: 'Kode OTP telah dikirim ke email Anda.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       })
     }
     otp.value = ['', '', '', '']
@@ -137,9 +150,10 @@ async function handleResendOtp() {
       const locked = res?.lockedTime || 60
       Swal.fire({
         icon: 'warning',
-        title: 'Terlalu Banyak Permintaan',
-        html: `Silakan coba dalam ${locked} detik.`,
+        title: 'Peringatan',
+        html: `Terlalu banyak permintaan!<br>Silakan coba dalam ${locked} detik.`,
         confirmButtonText: 'OK',
+        timer: 4000,
       })
       startCooldown(locked)
       return
@@ -158,8 +172,10 @@ function startOtpTimer(seconds = 300) {
       clearInterval(otpTimer)
       Swal.fire({
         icon: 'info',
-        title: 'Kode OTP Kadaluarsa!',
-        text: 'Silakan masukkan email kembali.',
+        title: 'Informasi',
+        html: 'Kode OTP Kadaluarsa!<br>Silakan masukkan email kembali.',
+        confirmButtonText: 'OK',
+        timer: 4000,
       }).then(() => {
         router.push('/forgot-password')
       })

@@ -32,8 +32,8 @@ router.beforeEach((to, from, next) => {
     localStorage.clear()
     Swal.fire({
       icon: 'warning',
-      title: 'Sesi Berakhir!',
-      text: 'Silahkan login kembali.',
+      title: 'Peringatan',
+      html: 'Sesi berakhir!<br>Silahkan login kembali.',
       confirmButtonText: 'OK',
       timer: 4000,
     }).then(() => {
