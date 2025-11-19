@@ -19,7 +19,6 @@ let cooldownTimer = null
 const otpExpired = ref(300)
 let otpTimer = null
 
-
 const themeStore = useThemeStore()
 const { setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
 

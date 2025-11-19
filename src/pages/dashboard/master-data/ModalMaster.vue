@@ -136,9 +136,7 @@ const onSubmit = (values) => {
           </CCol>
 
           <CCol :md="4" class="mb-3">
-            <CFormLabel for="password"
-              >Password {{ isEdit ? '(Kosongkan jika )' : '' }}</CFormLabel
-            >
+            <CFormLabel for="password">Password {{ isEdit ? '(Kosongkan jika )' : '' }}</CFormLabel>
             <Field name="password" v-slot="{ field }">
               <CFormInput
                 v-bind="field"
@@ -235,4 +233,3 @@ const onSubmit = (values) => {
   color: rgba(235, 235, 235, 0.897);
 }
 </style>
-

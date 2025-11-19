@@ -15,6 +15,8 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  pageNumber: Number,
+  pageSize: Number,
 })
 
 const emit = defineEmits(['edit', 'delete', 'view-detail'])
@@ -41,7 +43,7 @@ const columns = [
 
     <CTableBody>
       <CTableRow v-for="(item, index) in data" :key="item.id" class="text-center">
-        <CTableDataCell>{{ index + 1 }}</CTableDataCell>
+        <CTableDataCell>{{ (props.pageNumber - 1) * props.pageSize + (index + 1) }}</CTableDataCell>
         <CTableDataCell class="fw-semibold">{{ item.name }}</CTableDataCell>
         <CTableDataCell>{{ item.phoneNumber }}</CTableDataCell>
         <CTableDataCell>{{ item.occupation?.name }}</CTableDataCell>

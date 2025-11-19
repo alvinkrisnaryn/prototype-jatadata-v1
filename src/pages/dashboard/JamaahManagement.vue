@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { CRow, CCol, CCard, CButton } from '@coreui/vue'
+import { CRow, CCol, CCard, CButton, CPagination, CPaginationItem } from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
 import { cilPlus } from '@coreui/icons'
 import { storeToRefs } from 'pinia'
@@ -17,8 +17,8 @@ import { useJamaahStore } from '@/pages/template/stores/jamaahStore'
 const store = useJamaahStore()
 const router = useRouter()
 
-const { jamaahData, isLoading } = storeToRefs(store)
-const { fetchFilterJamaah, deleteJamaahData } = store
+const { jamaahData, isLoading, pageNumber, totalPage } = storeToRefs(store)
+const { fetchFilterJamaah, deleteJamaahData, setPage } = store
 
 const modalVisible = ref(false)
 const isEditMode = ref(false)
@@ -80,11 +80,42 @@ onMounted(() => {
           <JamaahTable
             v-if="!isLoading"
             :data="jamaahData"
+            :page-number="pageNumber"
+            :page-size="15"
             @edit="handleOpenModal('edit', $event)"
             @delete="handleDeleteJamaah"
             @view-detail="handleViewDetail"
           />
           <div v-else class="text-center py-5 text-muted">Memuat data jamaah...</div>
+
+          <CRow v-if="totalPage > 1" class="mt-4">
+            <CCol :xs="12">
+              <CPagination align="center" aria-label="Page navigation">
+                <CPaginationItem :disabled="pageNumber === 1" @click="setPage(pageNumber - 1)">
+                  &laquo;
+                </CPaginationItem>
+
+                <CPaginationItem
+                  v-for="p in totalPage"
+                  :key="p"
+                  :active="p === pageNumber"
+                  @click="setPage(p)"
+                >
+                  {{ p }}
+                </CPaginationItem>
+
+                <CPaginationItem
+                  :disabled="pageNumber === totalPage"
+                  @click="setPage(pageNumber + 1)"
+                >
+                  &raquo;
+                </CPaginationItem>
+              </CPagination>
+              <div class="text-center small text-muted mt-2">
+                Halaman {{ pageNumber }} dari {{ totalPage }}
+              </div>
+            </CCol>
+          </CRow>
         </CCard>
       </CCol>
     </CRow>

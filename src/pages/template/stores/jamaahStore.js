@@ -12,6 +12,9 @@ export const useJamaahStore = defineStore('jamaah', () => {
   const singleJamaah = ref(null)
   const isLoading = ref(false)
   const isDetailLoading = ref(false)
+  const pageNumber = ref(1)
+  const pageSize = ref(15)
+  const totalPage = ref(0)
   const totalData = ref(0)
 
   const filterState = ref({
@@ -43,19 +46,29 @@ export const useJamaahStore = defineStore('jamaah', () => {
     filterState.value[key] = value
   }
 
-  async function fetchFilterJamaah() {
+  async function fetchFilterJamaah(page = 1) {
     try {
       isLoading.value = true
+
+      pageNumber.value = page
+
       const params = {
         name: filterState.value.name || '',
         kojaId: filterState.value.kojaId || '',
         occupationId: filterState.value.occupationId || '',
         status: getApiValue(statusOptions.value, filterState.value.status) || '',
+        page: page - 1,
+        size: pageSize.value,
       }
 
       const response = await searchJamaah(params)
       if (response.responseCode === 200) {
-        jamaahData.value = response.data?.content || response.data || []
+        jamaahData.value = response.data || []
+
+        pageNumber.value = response.pageNumber || 1
+        pageSize.value = response.pageSize || 15
+        totalPage.value = response.totalPage || 1
+        totalData.value = response.totalData || 0
       } else {
         jamaahData.value = []
       }
@@ -361,13 +374,21 @@ export const useJamaahStore = defineStore('jamaah', () => {
     }
   }
 
+  function setPage(page) {
+    fetchFilterJamaah(page)
+  }
+
   return {
     // State
     jamaahData,
     singleJamaah,
     isLoading,
     isDetailLoading,
+    pageNumber,
+    pageSize,
+    totalPage,
     totalData,
+    setPage,
     filterState,
     kojaOptions,
     occupationOptions,
