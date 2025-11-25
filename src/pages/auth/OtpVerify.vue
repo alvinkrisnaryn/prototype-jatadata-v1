@@ -4,11 +4,14 @@ import { useRouter } from 'vue-router'
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { CButton, CCard } from '@coreui/vue'
 import Swal from 'sweetalert2'
-import { validateOtp, forgotPassword } from '@/api/auth'
+
+import { useAuthStore } from '@/pages/template/stores/authStore'
 import { useThemeStore } from '@/pages/template/stores/theme'
 import { useColorModes } from '@coreui/vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
 const otp = ref(['', '', '', ''])
 const inputRefs = ref([])
 
@@ -43,6 +46,7 @@ function handleBackspace(e, index) {
 
 async function handleSubmitOtp() {
   const otpCode = otp.value.join('')
+
   if (otpCode.length < 4) {
     Swal.fire({
       icon: 'error',
@@ -54,61 +58,7 @@ async function handleSubmitOtp() {
     return
   }
 
-  try {
-    const res = await validateOtp({ email, otp: otpCode })
-
-    if (res.responseCode === 200) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: 'Kode OTP berhasil diverifikasi.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => {
-        localStorage.setItem('otpVerified', 'true')
-        otp.value = ['', '', '', '']
-        router.push('/change-password')
-      })
-    }
-  } catch (err) {
-    const res = err?.response?.data
-
-    if (res?.responseCode === 400) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: 'Kode OTP salah atau telah kadaluarsa.',
-        confirmButtonText: 'Coba Lagi',
-        timer: 4000,
-      })
-    } else if (res?.responseCode === 404) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Peringatan',
-        text: 'Email anda tidak terdaftar.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-    } else if (res?.responseCode === 410) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Informasi',
-        html: 'Kode OTP Kadaluarsa!<br>Silakan masukkan email kembali.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => {
-        router.push('/forgot-password')
-      })
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: 'Silakan coba beberapa saat lagi.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-    }
-  }
+  await authStore.handleVerifyOtp({ email, otp: otpCode })
 }
 
 function startCooldown(seconds = 60) {
@@ -126,38 +76,19 @@ function startCooldown(seconds = 60) {
 async function handleResendOtp() {
   if (isCooldown.value) return
 
-  try {
-    const res = await forgotPassword({ email })
+  const result = await authStore.handleResendOtp(email)
 
-    if (res.responseCode === 200) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: 'Kode OTP telah dikirim ke email Anda.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-    }
+  if (result?.ok) {
     otp.value = ['', '', '', '']
     nextTick(() => inputRefs.value[0]?.focus())
+
     startCooldown()
     startOtpTimer()
-  } catch (err) {
-    const res = err.response?.data
-    const status = err.response?.status
+    return
+  }
 
-    if (status === 429) {
-      const locked = res?.lockedTime || 60
-      Swal.fire({
-        icon: 'warning',
-        title: 'Peringatan',
-        html: `Terlalu banyak permintaan!<br>Silakan coba dalam ${locked} detik.`,
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-      startCooldown(locked)
-      return
-    }
+  if (result?.locked) {
+    startCooldown(result.locked)
   }
 }
 

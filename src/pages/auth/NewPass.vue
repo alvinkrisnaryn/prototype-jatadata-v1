@@ -6,11 +6,13 @@ import { CButton, CCard } from '@coreui/vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
 import Swal from 'sweetalert2'
-import { changePassword } from '@/api/auth'
+
+import { useAuthStore } from '@/pages/template/stores/authStore'
 import { useThemeStore } from '@/pages/template/stores/theme'
 import { useColorModes } from '@coreui/vue'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -47,63 +49,11 @@ function togglePassword(type) {
 const onSubmit = async (values) => {
   const email = localStorage.getItem('resetEmail')
 
-  try {
-    const res = await changePassword({
-      email,
-      newPassword: values.password,
-      confirmNewPassword: values.confirmPassword,
-    })
-
-    if (res.responseCode === 200) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        html: 'Password berhasil diubah!<br>Silahkan login kembali.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => {
-        localStorage.removeItem('resetEmail')
-        localStorage.removeItem('otpExpireAt')
-        localStorage.removeItem('otpVerified')
-        router.push('/login')
-      })
-    }
-  } catch (err) {
-    const res = err?.response?.data
-
-    if (res?.responseCode === 400) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        html: 'Password yang anda masukkan tidak sama.',
-        confirmButtonText: 'Coba Lagi',
-      })
-    } else if (res?.responseCode === 404) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Peringatan',
-        html: 'Email tidak ditemukan!<br>Silakan masukkan email kembali.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => router.push('/forgot-password'))
-    } else if (res?.responseCode === 410) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Informasi',
-        text: 'Silakan masukkan email kembali.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => router.push('/forgot-password'))
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: 'Silakan coba beberapa saat lagi.',
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-    }
-  }
+  await auth.handleResetPassword({
+    email,
+    newPassword: values.password,
+    confirmNewPassword: values.confirmPassword,
+  })
 }
 
 function startOtpTimer(seconds) {
@@ -128,11 +78,13 @@ function startOtpTimer(seconds) {
   }, 1000)
 }
 
-onMounted(() => {
-  const expireAt = localStorage.getItem('otpExpireAt')
-  const remaining = expireAt ? Math.floor((expireAt - Date.now()) / 1000) : 0
+function initOtpTimer() {
+  const expireAt = Number(localStorage.getItem('otpExpireAt'))
+  const now = Date.now()
 
-  if (!remaining || remaining <= 0) {
+  const remaining = Math.floor((expireAt - now) / 1000)
+
+  if (!expireAt || remaining <= 0) {
     Swal.fire({
       icon: 'info',
       title: 'Perhatian',
@@ -143,16 +95,19 @@ onMounted(() => {
       localStorage.removeItem('otpExpireAt')
       router.push('/forgot-password')
     })
-  } else {
-    startOtpTimer(remaining)
+    return
   }
-})
+
+  startOtpTimer(remaining)
+}
 
 onUnmounted(() => {
   if (otpTimer) clearInterval(otpTimer)
 })
 
 onMounted(() => {
+  initOtpTimer()
+
   setColorMode('light')
   themeStore.toggleTheme('light')
   document.body.classList.remove('dark')

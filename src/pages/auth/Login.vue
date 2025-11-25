@@ -4,18 +4,17 @@ import AuthNavbar from '@/layouts/AuthNavbar.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
-import Swal from 'sweetalert2'
-import router from '@/router'
-import { login } from '@/api/auth'
+
+import { useAuthStore } from '@/pages/template/stores/authStore'
 import { useThemeStore } from '@/pages/template/stores/theme'
 import { useColorModes } from '@coreui/vue'
+import { storeToRefs } from 'pinia'
+
+const auth = useAuthStore()
+const { loading, isCooldown, remainingTime } = storeToRefs(auth)
 
 const showPassword = ref(false)
 const isPasswordFocused = ref(false)
-const loading = ref(false)
-const isCooldown = ref(false)
-const remainingTime = ref(0)
-let countdownInterval = null
 
 const themeStore = useThemeStore()
 const { setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
@@ -36,45 +35,6 @@ function togglePassword() {
   showPassword.value = !showPassword.value
 }
 
-function startCountdownFromEnd(endTimestamp) {
-  clearInterval(countdownInterval)
-  const updateRemaining = () => {
-    const now = Date.now()
-    const diff = Math.max(0, Math.ceil((endTimestamp - now) / 1000))
-    remainingTime.value = diff
-    if (diff <= 0) finishCountdown()
-  }
-  updateRemaining()
-  countdownInterval = setInterval(updateRemaining, 1000)
-  isCooldown.value = true
-}
-
-function finishCountdown() {
-  clearInterval(countdownInterval)
-  countdownInterval = null
-  isCooldown.value = false
-  remainingTime = 0
-  localStorage.removeItem('cooldownEndTime')
-  Swal.fire({
-    icon: 'info',
-    title: 'Informasi',
-    text: 'Waktu tunggu berakhir! Silahkan login kembali',
-    confirmButtonText: 'OK',
-  })
-}
-
-onMounted(() => {
-  const storeEnd = localStorage.getItem('cooldownEndTime')
-  if (storeEnd) {
-    const end = parseInt(storeEnd, 10)
-    if (!Number.isNaN(end) && Date.now() < end) {
-      startCountdownFromEnd(end)
-    } else {
-      localStorage.removeItem('cooldownEndTime')
-    }
-  }
-})
-
 onMounted(() => {
   setColorMode('light')
   themeStore.toggleTheme('light')
@@ -87,59 +47,7 @@ onUnmounted(() => {
 })
 
 const onSubmit = async (values) => {
-  if (isCooldown.value) return
-
-  loading.value = true
-  try {
-    const res = await login({
-      email: values.email,
-      password: values.password,
-    })
-
-    if (res.responseCode === 200) {
-      const data = res.data
-      localStorage.setItem('token', data.accessToken)
-      localStorage.setItem('tokenType', data.tokenType)
-      localStorage.setItem('username', data.username)
-      localStorage.setItem('role', data.role.name)
-
-      localStorage.removeItem('cooldownEndtime')
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: `Selamat datang, ${data.username}!`,
-        confirmButtonText: 'OK',
-        timer: 4000,
-      })
-      router.push('/home')
-    }
-  } catch (err) {
-    const res = err.response?.data
-
-    if (res?.responseCode === 404) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: 'Email atau Password salah.',
-        confirmButtonText: 'Coba Lagi',
-      })
-    }
-
-    if (res?.responseCode === 423) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Peringatan',
-        text: `Silakan coba lagi dalam ${res.lockedTime} detik.`,
-        confirmButtonText: 'OK',
-      })
-      const end = Date.now() + res.lockedTime * 1000
-      localStorage.setItem('cooldownEndTime', String(end))
-      startCountdownFromEnd(end)
-    }
-  } finally {
-    loading.value = false
-  }
+  await auth.handleLogin(values)
 }
 </script>
 
@@ -150,7 +58,6 @@ const onSubmit = async (values) => {
         <div class="w-100" style="max-width: 400px">
           <h2 class="fw-semibold fs-3 text-center">Selamat Datang Kembali</h2>
           <p class="text-center mb-4 text-muted-light">Silahkan masuk ke akun Anda</p>
-
           <Form @submit="onSubmit" :validation-schema="schema">
             <div class="form-group">
               <div class="position-relative">

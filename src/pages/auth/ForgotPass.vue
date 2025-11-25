@@ -1,18 +1,18 @@
 <script setup>
 import AuthNavbar from '@/layouts/AuthNavbar.vue'
-import { useRouter } from 'vue-router'
+
 import { CButton, CCard } from '@coreui/vue'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
-import Swal from 'sweetalert2'
-import { forgotPassword } from '@/api/auth'
+
+import { useAuthStore } from '@/pages/template/stores/authStore'
 import { useThemeStore } from '@/pages/template/stores/theme'
 import { useColorModes } from '@coreui/vue'
+import { storeToRefs } from 'pinia'
 
-const router = useRouter()
-const loading = ref(false)
-const isCooldown = ref(false)
+const auth = useAuthStore()
+const { loading, isCooldown } = storeToRefs(auth)
 
 const themeStore = useThemeStore()
 const { setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
@@ -33,42 +33,7 @@ onUnmounted(() => {
 })
 
 const onSubmit = async (values) => {
-  if (isCooldown.value) return
-
-  loading.value = true
-
-  try {
-    const res = await forgotPassword({ email: values.email })
-
-    if (res.responseCode === 200) {
-      localStorage.setItem('resetEmail', values.email)
-      localStorage.setItem('otpExpireAt', Date.now() + 300000)
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: `Kode OTP telah dikirim ke email ${values.email}`,
-        confirmButtonText: 'OK',
-        timer: 4000,
-      }).then(() => {
-        router.push('/validate-otp')
-      })
-    }
-  } catch (err) {
-    const res = err.response?.data
-
-    if (res?.responseCode === 404) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: 'Email yang anda gunakan tidak terdaftar!',
-        confirmButtonText: 'Coba Lagi',
-        timer: 4000,
-      })
-    }
-  } finally {
-    loading.value = false
-  }
+  await auth.handleForgotPassword(values.email)
 }
 </script>
 
